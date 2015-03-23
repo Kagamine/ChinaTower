@@ -1,0 +1,17 @@
+.content-wrap {
+    margin-top: 40px;
+}
+
+.td-gray {
+    background-color: #eee;
+}
+
+.edit-tower, .create-user {
+    width: 100%;
+}
+
+.edit-tower td, .create-user td {
+    padding: 5px;
+    border: 1px solid #ccc;
+    margin-top: 0;
+}

@@ -1,0 +1,158 @@
+<style>
+    body, html, #allmap {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        margin: 0;
+        font-family: "微软雅黑";
+    }
+
+    #allmap {
+        margin-top: 40px;
+    }
+
+    #graphic {
+        width: 120px;
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 10px;
+    }
+
+    #tower {
+        position: absolute;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 10px;
+        display: none;
+    }
+
+    #tower td {
+        padding: 5px;
+        border: 1px solid #ccc;
+    }
+
+    #tower img {
+        max-width: 220px;
+        max-height: 100px;
+    }
+</style>
+<div id="allmap"></div>
+<div id="graphic">
+    <p style="color: green">
+        ● -65 至 0
+    </p>
+    <p style="color: #c0c000">
+        ● -75 至 -65
+    </p>
+    <p style="color: red">
+        ● -140 至 -75
+    </p>
+</div>
+<div id="tower">
+    <p>
+        <img id="tower-picture" src="" />
+    </p>
+    <table>
+        <tr>
+            <td class="td-gray">铁塔名称</td>
+            <td id="tower-name"></td>
+        </tr>
+        <tr>
+            <td class="td-gray">所属地区</td>
+            <td id="tower-district"></td>
+        </tr>
+        <tr>
+            <td class="td-gray">运营商</td>
+            <td id="tower-provider"></td>
+        </tr>
+        <tr>
+            <td class="td-gray">类型</td>
+            <td id="tower-type"></td>
+        </tr>
+        <tr>
+            <td class="td-gray">高度</td>
+            <td id="tower-height"></td>
+        </tr>
+    </table>
+</div>
+<script>
+    var map = new BMap.Map("allmap");
+
+    var icons = {};
+    icons['China Mobile'] = {};
+    icons['China Mobile']['B'] = new BMap.Icon("/images/cm-b.png", new BMap.Size(30, 30));
+    icons['China Mobile']['T'] = new BMap.Icon("/images/cm-t.png", new BMap.Size(30, 30));
+    icons['China Mobile']['Z'] = new BMap.Icon("/images/cm-z.png", new BMap.Size(30, 30));
+    icons['China Telecom'] = {};
+    icons['China Telecom']['B'] = new BMap.Icon("/images/cm-b.png", new BMap.Size(30, 30));
+    icons['China Telecom']['T'] = new BMap.Icon("/images/cm-t.png", new BMap.Size(30, 30));
+    icons['China Telecom']['Z'] = new BMap.Icon("/images/cm-z.png", new BMap.Size(30, 30));
+    icons['China Unicom'] = {};
+    icons['China Unicom']['B'] = new BMap.Icon("/images/cm-b.png", new BMap.Size(30, 30));
+    icons['China Unicom']['T'] = new BMap.Icon("/images/cm-t.png", new BMap.Size(30, 30));
+    icons['China Unicom']['Z'] = new BMap.Icon("/images/cm-z.png", new BMap.Size(30, 30));
+
+    map.addControl(new BMap.MapTypeControl());
+    map.enableScrollWheelZoom(true);
+    var init = false;
+    $.getJSON('/tower/positions', {}, function (towers) {
+        for (var i = 0; i < towers.length; i ++)
+        {
+            var pos = GPS.wgs_to_bd(towers[i].lat, towers[i].lon);
+            var pt = new BMap.Point(pos.lon, pos.lat);
+            var marker = new BMap.Marker(pt, { icon: icons[towers[i].provider][towers[i].type] });
+            marker.height = towers[i].height;
+            marker.name = towers[i].name;
+            marker.district = towers[i].district;
+            marker.provider = towers[i].provider;
+            marker.picture = towers[i].picture;
+            marker.type = towers[i].type;
+            marker.addEventListener("mouseover", function (e) {
+                var x = event.clientX;
+                var y = event.clientY;
+                $("#tower-name").html(e.target.name);
+                $("#tower-district").html(e.target.district);
+                if (e.target.provider == 'China Mobile') {
+                    $("#tower-provider").html('中国移动');
+                } else if (e.target.provider == 'China Telecom') {
+                    $("#tower-provider").html('中国电信');
+                } else {
+                    $("#tower-provider").html('中国联通');
+                }
+                $("#tower-picture").attr('src', '/file/download/' + e.target.picture);
+                $("#tower-type").html(e.target.type);
+                $("#tower-height").html(e.target.height);
+                $("#tower").css("left", x);
+                $("#tower").css("top", y);
+                $("#tower").show();
+            });
+            marker.addEventListener("mouseout", function (e) {
+                $("#tower").hide();
+            });
+            map.addOverlay(marker);
+        }
+    });
+    $.getJSON('/map', {}, function (lines) {
+        for (var i = 0; i < lines.length; i++) {
+            var startPos =  GPS.wgs_to_bd(lines[i].start.lat, lines[i].start.lon);
+            lines[i].start = startPos;
+            var endPos =  GPS.wgs_to_bd(lines[i].end.lat, lines[i].end.lon);
+            lines[i].end = endPos;
+            if (!init) {
+                init = true;
+                map.centerAndZoom(new BMap.Point(lines[i].end.lon, lines[i].end.lat), 12.5);
+            }
+            var color = "#00ff00";
+            if (lines[i].color == 1) color = "#fff000";
+            if (lines[i].color == 2) color = "#ff0000";
+            var polyline = new BMap.Polyline([
+            new BMap.Point(lines[i].start.lon, lines[i].start.lat),
+            new BMap.Point(lines[i].end.lon, lines[i].end.lat)
+        ], {strokeColor:color, strokeWeight:5, strokeOpacity:1});
+            map.addOverlay(polyline);
+        }
+    });
+</script>

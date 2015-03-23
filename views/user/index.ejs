@@ -1,0 +1,69 @@
+<div id="modalEditUser" class="modal hide fade">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>修改密码</h3>
+    </div>
+    <div class="modal-body">
+        <input type="hidden" name="id" id="UserID" />
+        <input id="txtPassword" type="password" placeholder="新密码" />
+    </div>
+    <div class="modal-footer">
+        <button id="btnSaveUser" role="button" class="btn btn-primary">保存</button>
+    </div>
+</div>
+
+<div id="modalCreateUser" class="modal hide fade">
+    <form action="/user/create" method="post">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>创建用户</h3>
+        </div>
+        <div class="modal-body">
+            <table class="create-user">
+                <tr>
+                    <td class="td-gray">用户名</td>
+                    <td><input name="username" type="text" placeholder="用户名" /></td>
+                </tr>
+                <tr>
+                    <td class="td-gray">密码</td>
+                    <td><input name="password" type="password" placeholder="密码" /></td>
+                </tr>
+                <tr>
+                    <td class="td-gray">电子邮箱</td>
+                    <td><input name="email" type="text" placeholder="电子邮箱" /></td>
+                </tr>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button id="btnSaveUser" class="btn btn-primary">创建</button>
+        </div>
+    </form>
+</div>
+
+<div class="content-wrap">
+    <div class="container">
+        <h2>用户管理</h2>
+        <a href="javascript:$('#modalCreateUser').modal('show');" class="btn btn-small btn-warning">添加用户</a>
+        <table class="table">
+            <thead>
+            <th>用户名</th>
+            <th>电子邮箱</th>
+            <th>操作</th>
+            </thead>
+            <tbody>
+            <% users.forEach(x => { %>
+            <tr data-user="<%= x._id %>">
+                <td><%= x.username %></td>
+                <td><%= x.email %></td>
+                <td>
+                    <a href="javascript:;" class="btn btn-info btn-small edit-user">修改密码</a>
+                    <% if (req.session.uid != x._id) { %>
+                    <a href="javascript:;" class="btn btn-danger btn-small delete-user">删除用户</a>
+                    <% } %>
+                </td>
+            </tr>
+            <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>

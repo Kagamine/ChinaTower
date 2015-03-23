@@ -1,0 +1,13 @@
+<% towers.forEach(x => { %>
+<tr data-tower="<%= x._id %>" data-provider="<%= x.provider %>" data-lon="<%= x.lon %>" data-lat="<%= x.lat%>" data-picture="<%= x.picture %>" data-height="<%= x.height %>">
+    <td class="name"><%= x.name %></td>
+    <td class="district"><%= x.district %></td>
+    <td><%= x.providerDisplay %></td>
+    <td class="type"><%= x.type %></td>
+    <td><%= x.height %> 米</td>
+    <td>
+        <a class="btn btn-small btn-info" href="javascript:editTower('<%= x._id %>')">编辑</a>
+        <a class="btn btn-small btn-danger" href="javascript:deleteTower('<%= x._id %>')">删除</a>
+    </td>
+</tr>
+<% }) %>

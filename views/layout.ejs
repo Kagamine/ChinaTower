@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title><%= title %> - 中国铁塔基站规划系统</title>
+    <link href="/styles/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/styles/bootstrap-responsive.min.css" rel="stylesheet" type="text/css" />
+    <link href="/styles/tower.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=g6DcirKK7FlGGGoiLwslU9kL"></script>
+    <script src="/scripts/converter.min.js"></script>
+    <script src="/scripts/jquery.min.js"></script>
+    <script src="/scripts/bootstrap.min.js"></script>
+    <script src="/scripts/tower.js"></script>
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="./index.html">中国铁塔</a>
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    <li>
+                        <a href="/">地图展示</a>
+                    </li>
+                    <li class="">
+                        <a href="/tower">铁塔管理</a>
+                    </li>
+                    <li class="">
+                        <a href="/user">用户管理</a>
+                    </li>
+                    <li class="">
+                        <a href="/system">系统设置</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<%- body %>
+</body>
+</html>
