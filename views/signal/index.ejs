@@ -1,0 +1,52 @@
+
+<div id="modalImportSignal" class="modal hide fade">
+    <form action="/signal/import" method="post" enctype="multipart/form-data">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>导入信号数据</h3>
+        </div>
+        <div class="modal-body">
+            <table class="create-user">
+                <tr>
+                    <td class="td-gray">标题</td>
+                    <td><input type="text" name="title" placeholder="标题" /></td>
+                </tr>
+                <tr>
+                    <td class="td-gray">数据文件</td>
+                    <td><input name="file" type="file" /></td>
+                </tr>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button role="button" class="btn btn-primary">导入</button>
+        </div>
+    </form>
+</div>
+
+<div class="content-wrap">
+    <div class="container">
+        <h2>信号管理</h2>
+        <p>
+            <a class="btn btn-info" href="javascript:$('#modalImportSignal').modal('show');">导入信号</a>
+        </p>
+        <table class="table">
+            <thead>
+            <th>名称</th>
+            <th>导入日期</th>
+            <th>操作</th>
+            </thead>
+            <tbody>
+            <% serieses.forEach(x => { %>
+            <tr data-series="<%= x._id %>">
+                <td><%= x.title %></td>
+                <td><%= moment(x.time).format('YYYY-MM-DD hh:mm') %></td>
+                <td>
+                    <a href="/?series=<%= x._id %>" class="btn btn-success btn-small">查看</a>
+                    <a href="javascript:;" class="btn btn-small btn-danger delete-series">删除</a>
+                </td>
+            </tr>
+            <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>

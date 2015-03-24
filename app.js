@@ -9,13 +9,16 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 var multer = require('multer');
 var auth = GLOBAL.auth = require('./middlewares/auth')
+var moment = GLOBAL.moment = require('moment');
 
 var home = require('./controllers/home');
 var login = require('./controllers/login');
+var logout = require('./controllers/logout');
 var tower = require('./controllers/tower');
 var map = require('./controllers/map');
 var file = require('./controllers/file');
 var user = require('./controllers/user');
+var signal = require('./controllers/signal');
 
 var app = express();
 app.use(expressLayouts);
@@ -39,15 +42,18 @@ app.use(session({ secret: 'china-tower', resave: false, saveUninitialized: true 
 app.use(function (req, res, next) {
     res.locals.res = res;
     res.locals.req = req;
+    res.locals.moment = moment;
     next();
 });
 
 app.use('/', home);
 app.use('/login', login);
+app.use('/logout', logout);
 app.use('/tower', tower);
 app.use('/map', map);
 app.use('/file', file);
 app.use('/user', user);
+app.use('/signal', signal);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

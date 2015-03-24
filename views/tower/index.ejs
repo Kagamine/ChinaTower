@@ -1,3 +1,23 @@
+<div id="modalImportTowers" class="modal hide fade">
+    <form action="/tower/import" method="post" enctype="multipart/form-data">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>导入铁塔数据</h3>
+        </div>
+        <div class="modal-body">
+            <table class="create-user">
+                <tr>
+                    <td class="td-gray">数据文件</td>
+                    <td><input name="file" type="file" /></td>
+                </tr>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button role="button" class="btn btn-primary">导入</button>
+        </div>
+    </form>
+</div>
+
 <div id="modalEditTower" class="modal hide fade">
     <form action="/tower/edit" method="post" enctype="multipart/form-data">
         <div class="modal-header">
@@ -80,6 +100,7 @@
                 </select>
                 <input type="text" placeholder="地区" id="txtDistrict" />
                 <button role="button" class="btn btn-primary" id="btnSearchTower">检索</button>
+                <a href="javascript:$('#modalImportTowers').modal('show')" class="btn btn-success" style="float:right">导入铁塔数据</a>
             </p>
         </div>
         <table class="table">

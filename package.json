@@ -16,6 +16,7 @@
     "express-ejs-layouts": "~1.1.0",
     "express-session": "~1.10.4",
     "multer": "~0.1.8",
-    "gridfs-stream": "~1.1.0"
+    "gridfs-stream": "~1.1.0",
+    "moment": "~2.9.0"
   }
 }

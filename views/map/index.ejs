@@ -38,8 +38,81 @@
         max-width: 220px;
         max-height: 100px;
     }
+
+    #buttons {
+        bottom: 15px;
+        left: 15px;
+        position: absolute;
+    }
 </style>
+<div id="modalEditTower" class="modal hide fade">
+    <form action="/tower/create" method="post" enctype="multipart/form-data">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>创建铁塔</h3>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" name="id" id="TowerID" />
+            <table class="edit-tower">
+                <tr>
+                    <td class="td-gray">铁塔名称</td>
+                    <td><input type="text" name="name" id="txtName" placeholder="铁塔名称" /></td>
+                </tr>
+                <tr>
+                    <td class="td-gray">所属地区</td>
+                    <td><input type="text" name="district" id="txtDistrict" placeholder="所属地区" /></td>
+                </tr>
+                <tr>
+                    <td class="td-gray">运营商</td>
+                    <td>
+                        <select id="lstEditProviders" name="provider">
+                            <option value="China Mobile">中国移动</option>
+                            <option value="China Telecom">中国电信</option>
+                            <option value="China Unicom">中国联通</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-gray">塔型</td>
+                    <td>
+                        <select id="lstEditTypes" name="type">
+                            <option value="B">B</option>
+                            <option value="T">T</option>
+                            <option value="Z">Z</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-gray">塔高</td>
+                    <td><input name="height" type="text" id="txtHeight" placeholder="塔高" /></td>
+                </tr>
+                <tr>
+                    <td class="td-gray">经度</td>
+                    <td><input name="lon" type="text" id="txtLon" placeholder="经度" /></td>
+                </tr>
+                <tr>
+                    <td class="td-gray">纬度</td>
+                    <td><input name="lat" type="text" id="txtLat" placeholder="纬度" /></td>
+                </tr>
+                <tr>
+                    <td class="td-gray">铁塔照片</td>
+                    <td>
+                        <p><input name="file" type="file" /></p>
+                        <p><img id="imgTower" style="max-width: 100%; max-height: 200px" /></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary">保存</button>
+        </div>
+    </form>
+</div>
 <div id="allmap"></div>
+<div id="buttons">
+    <a class="btn btn-success" href="javascript:myDis.open();" >测距</a>
+    <small style="color:gray">在地图上点击右键添加铁塔</small>
+</div>
 <div id="graphic">
     <p style="color: green">
         ● -65 至 0
@@ -78,10 +151,15 @@
         </tr>
     </table>
 </div>
+<script type="text/javascript" src="http://api.map.baidu.com/library/DistanceTool/1.2/src/DistanceTool_min.js"></script>
 <script>
     var map = new BMap.Map("allmap");
-
+    var myDis = new BMapLib.DistanceTool(map);
+    <% if (req.query.series) { %>
+    series = '<%= req.query.series %>';
+    <% } %>
     var icons = {};
+    var init = false;
     icons['China Mobile'] = {};
     icons['China Mobile']['B'] = new BMap.Icon("/images/cm-b.png", new BMap.Size(30, 30));
     icons['China Mobile']['T'] = new BMap.Icon("/images/cm-t.png", new BMap.Size(30, 30));
@@ -97,10 +175,20 @@
 
     map.addControl(new BMap.MapTypeControl());
     map.enableScrollWheelZoom(true);
-    var init = false;
-    $.getJSON('/tower/positions', {}, function (towers) {
+    map.addEventListener("rightclick", function(e){
+        var point = {lng:e.point.lng,lat:e.point.lat};
+        var result = GPS.bd_to_wgs(point.lat, point.lng);
+        $('#txtLon').val(result.lon);
+        $('#txtLat').val(result.lat);
+        $('#modalEditTower').modal('show');
+    });
+    $.getJSON('/tower/positions', { series: series }, function (towers) {
         for (var i = 0; i < towers.length; i ++)
         {
+            if (!init) {
+                init = true;
+                map.centerAndZoom(new BMap.Point(towers[i].lon, towers[i].lat), 12.5);
+            }
             var pos = GPS.wgs_to_bd(towers[i].lat, towers[i].lon);
             var pt = new BMap.Point(pos.lon, pos.lat);
             var marker = new BMap.Marker(pt, { icon: icons[towers[i].provider][towers[i].type] });
@@ -141,10 +229,6 @@
             lines[i].start = startPos;
             var endPos =  GPS.wgs_to_bd(lines[i].end.lat, lines[i].end.lon);
             lines[i].end = endPos;
-            if (!init) {
-                init = true;
-                map.centerAndZoom(new BMap.Point(lines[i].end.lon, lines[i].end.lat), 12.5);
-            }
             var color = "#00ff00";
             if (lines[i].color == 1) color = "#fff000";
             if (lines[i].color == 2) color = "#ff0000";

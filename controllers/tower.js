@@ -67,4 +67,48 @@ router.post('/delete', auth.authorize, function (req, res, next) {
     res.send('true');
 });
 
+router.post('/create', auth.authorize, function (req, res, next) {
+    let tower = new db.towers();
+    tower.name = req.body.name;
+    tower.height = req.body.height;
+    tower.provider = req.body.provider;
+    tower.type = req.body.type;
+    tower.district = req.body.district;
+    tower.lon = req.body.lon;
+    tower.lat = req.body.lat;
+    tower.save(function (err, tower) {
+        if (req.files.file) {
+            let writestream = db.gfs.createWriteStream({
+                filename: req.files.file.originalname
+            });
+            db.fs.createReadStream(req.files.file.path).pipe(writestream);
+            writestream.on('close', function (file) {
+                db.fs.unlink(req.files.file.path);
+                db.towers.update({ _id: tower._id }, {
+                    picture: file._id
+                }).exec();
+            });
+        }
+        res.redirect('/');
+    });
+});
+
+router.post('/import', auth.authorize, function (req, res, next) {
+    if (req.files.file) {
+        let towers = JSON.parse(db.fs.readFileSync(req.files.file.path));
+        towers.forEach(x => {
+            let tower = new db.towers();
+            tower.name = x.name;
+            tower.district = x.district;
+            tower.provider = x.provider;
+            tower.type = x.type;
+            tower.height = x.height;
+            tower.lon = x.lon;
+            tower.lat = x.lat;
+            tower.save();
+        });
+    }
+    res.redirect('/tower');
+});
+
 module.exports = router;

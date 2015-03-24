@@ -1,5 +1,6 @@
 var page = 1;
 var lock = false;
+var series = null;
 
 function load() {
     loadTowers();
@@ -54,6 +55,12 @@ $(document).ready(function () {
         var id = $(this).parents('tr').attr('data-user');
         $('tr[data-user="' + id + '"]').remove();
         $.post('/user/delete', { id: id }, function () {});
+    });
+
+    $('.delete-series').click(function () {
+        var id = $(this).parents('tr').attr('data-series');
+        $('tr[data-series="' + id + '"]').remove();
+        $.post('/signal/delete', { id: id }, function () {});
     });
 });
 
