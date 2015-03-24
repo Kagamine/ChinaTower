@@ -57,7 +57,8 @@ router.post('/edit', auth.authorize, function (req, res, next) {
         district: req.body.district,
         provider: req.body.provider,
         height: req.body.height,
-        type: req.body.type
+        type: req.body.type,
+        url: req.body.url
     }).exec();
     res.redirect('/tower');
 });
@@ -76,6 +77,7 @@ router.post('/create', auth.authorize, function (req, res, next) {
     tower.district = req.body.district;
     tower.lon = req.body.lon;
     tower.lat = req.body.lat;
+    tower.url = req.body.url;
     tower.save(function (err, tower) {
         if (req.files.file) {
             let writestream = db.gfs.createWriteStream({

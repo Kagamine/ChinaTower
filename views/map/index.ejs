@@ -95,6 +95,10 @@
                     <td><input name="lat" type="text" id="txtLat" placeholder="纬度" /></td>
                 </tr>
                 <tr>
+                    <td class="td-gray">链接URL</td>
+                    <td><input name="url" type="text" id="txtLat" placeholder="链接URL" /></td>
+                </tr>
+                <tr>
                     <td class="td-gray">铁塔照片</td>
                     <td>
                         <p><input name="file" type="file" /></p>
@@ -198,6 +202,7 @@
             marker.provider = towers[i].provider;
             marker.picture = towers[i].picture;
             marker.type = towers[i].type;
+            marker.url = towers[i].url;
             marker.addEventListener("mouseover", function (e) {
                 var x = event.clientX;
                 var y = event.clientY;
@@ -219,6 +224,11 @@
             });
             marker.addEventListener("mouseout", function (e) {
                 $("#tower").hide();
+            });
+            marker.addEventListener("click", function (e) {
+                if (e.target.url) {
+                    window.location = e.target.url;
+                }
             });
             map.addOverlay(marker);
         }

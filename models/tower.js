@@ -26,7 +26,8 @@ var towerSchema = new Schema({
     picture: {
         type: Schema.Types.ObjectId,
         ref: 'fs.files'
-    }
+    },
+    url: String
 });
 
 towerSchema.virtual('providerDisplay').get(function () {

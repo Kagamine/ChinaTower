@@ -74,6 +74,7 @@ function editTower(id) {
     $('#txtLon').val(tower.attr('data-lon'));
     $('#txtLat').val(tower.attr('data-lat'));
     $('#txtHeight').val(tower.attr('data-height'));
+    $('#txtUrl').val(tower.attr('data-url'));
     $('#TowerID').val(tower.attr('data-tower'));
     $('#modalEditTower').modal('show');
 }
