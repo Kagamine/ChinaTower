@@ -15,7 +15,7 @@ function loadTowers() {
             p: page,
             provider: $('#lstProviders').val(),
             type: $('#lstTypes').val(),
-            district: $('#txtDistrict').val()
+            district: $('#txtSearchDistrict').val()
         }, function (html) {
             $('.tower-list').append(html);
             page ++;
