@@ -4,6 +4,7 @@ var router = express.Router();
 
 router.get('/', auth.authorize, function (req, res, next) {
     db.serieses.find()
+        .sort({ time: -1 })
         .exec()
         .then(function (serieses) {
             res.render('signal/index', { title: '信号管理', serieses: serieses });
@@ -17,17 +18,22 @@ router.post('/import', auth.authorize, function (req, res, next) {
         series.title = req.body.title;
         series.time = Date.now();
         series.save(function (err, series) {
-            let signals = JSON.parse(db.fs.readFileSync(req.files.file.path));
+            let file = db.fs.readFileSync(req.files.file.path);
+            file = file.toString().split('\n');
             let i = 0;
-            signals.forEach(x => {
+            file.forEach(x => {
+                x = x.replace(/\t/g, ' ');
+                x = x.replace(/     /g, ' ');
+                x = x.replace(/    /g, ' ');
+                x = x.replace(/   /g, ' ');
+                x = x.replace(/  /g, ' ');
+                x = x.split(' ');
                 let signal = new db.signal();
-                signal.lon = x.lon;
-                signal.lat = x.lat;
-                signal.signal = x.signal;
+                signal.lon = x[0];
+                signal.lat = x[1];
+                signal.signal = x[2];
                 signal.series = series._id;
                 signal.order = i++;
-                if (i == 0)
-                    console.log(signal);
                 signal.save();
             });
         });

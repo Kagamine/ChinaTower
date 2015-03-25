@@ -20,7 +20,9 @@ router.get('/', auth.authorize, function (req, res, next) {
     if (req.query.type)
         query = query.where({ type: req.query.type });
     if (req.query.provider)
-        query = query.where({ provider: req.query.provider });
+        query = query.where({ provider: new RegExp('.*' + req.query.provider + '.*') });
+    if (req.query.name)
+        query = query.where({ name: new RegExp('.*' + req.query.name + '.*') });
     query
         .skip((req.query.p - 1) * 50)
         .limit(50)
@@ -97,16 +99,28 @@ router.post('/create', auth.authorize, function (req, res, next) {
 
 router.post('/import', auth.authorize, function (req, res, next) {
     if (req.files.file) {
-        let towers = JSON.parse(db.fs.readFileSync(req.files.file.path));
-        towers.forEach(x => {
+        let file = db.fs.readFileSync(req.files.file.path);
+        file = file.toString().split('\n');
+        file.forEach(x => {
+            x = x.replace(/\t/g, ' ');
+            x = x.replace(/     /g, ' ');
+            x = x.replace(/    /g, ' ');
+            x = x.replace(/   /g, ' ');
+            x = x.replace(/  /g, ' ');
+            x = x.split(' ');
             let tower = new db.towers();
-            tower.name = x.name;
-            tower.district = x.district;
-            tower.provider = x.provider;
-            tower.type = x.type;
-            tower.height = x.height;
-            tower.lon = x.lon;
-            tower.lat = x.lat;
+            tower.name = x[0];
+            tower.district = x[1];
+            if (x[2].trim() == '中国移动')
+                tower.provider = 'China Mobile';
+            else if (x[2].trim() == '中国联通')
+                tower.provider = 'China Unicom';
+            else
+                tower.provider = 'China Telecom';
+            tower.type = x[3];
+            tower.height = x[4];
+            tower.lon = x[5];
+            tower.lat = x[6];
             tower.save();
         });
     }
