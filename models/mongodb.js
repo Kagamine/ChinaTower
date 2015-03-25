@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://tower:123456@www.qqhrvc.com/tower', {
+mongoose.connect('mongodb://tower:123456@localhost/tower', {
     server: {
         auto_reconnect: true,
         socketOptions:{
