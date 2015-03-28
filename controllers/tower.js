@@ -60,7 +60,7 @@ router.post('/edit', auth.authorize, function (req, res, next) {
         provider: req.body.provider,
         height: req.body.height,
         type: req.body.type,
-        url: req.body.url
+        url: req.body.url ? req.body.url : ''
     }).exec();
     res.redirect('/tower');
 });
@@ -102,26 +102,30 @@ router.post('/import', auth.authorize, function (req, res, next) {
         let file = db.fs.readFileSync(req.files.file.path);
         file = file.toString().split('\n');
         file.forEach(x => {
-            x = x.replace(/\t/g, ' ');
-            x = x.replace(/     /g, ' ');
-            x = x.replace(/    /g, ' ');
-            x = x.replace(/   /g, ' ');
-            x = x.replace(/  /g, ' ');
-            x = x.split(' ');
-            let tower = new db.towers();
-            tower.name = x[0];
-            tower.district = x[1];
-            if (x[2].trim() == '中国移动')
-                tower.provider = 'China Mobile';
-            else if (x[2].trim() == '中国联通')
-                tower.provider = 'China Unicom';
-            else
-                tower.provider = 'China Telecom';
-            tower.type = x[3];
-            tower.height = x[4];
-            tower.lon = x[5];
-            tower.lat = x[6];
-            tower.save();
+            try {
+                x = x.replace(/\t/g, ' ');
+                x = x.replace(/     /g, ' ');
+                x = x.replace(/    /g, ' ');
+                x = x.replace(/   /g, ' ');
+                x = x.replace(/  /g, ' ');
+                x = x.split(' ');
+                let tower = new db.towers();
+                tower.name = x[0];
+                tower.district = x[1];
+                if (x[2].trim() == '中国移动')
+                    tower.provider = 'China Mobile';
+                else if (x[2].trim() == '中国联通')
+                    tower.provider = 'China Unicom';
+                else
+                    tower.provider = 'China Telecom';
+                tower.type = x[3];
+                tower.height = x[4];
+                tower.lon = x[5];
+                tower.lat = x[6];
+                tower.save();
+            } catch (e) {
+                console.error(e);
+            }
         });
     }
     res.redirect('/tower');

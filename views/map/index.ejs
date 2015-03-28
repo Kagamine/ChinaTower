@@ -235,17 +235,17 @@
     });
     $.getJSON('/map', {}, function (lines) {
         for (var i = 0; i < lines.length; i++) {
-            var startPos =  GPS.wgs_to_bd(lines[i].start.lat, lines[i].start.lon);
-            lines[i].start = startPos;
-            var endPos =  GPS.wgs_to_bd(lines[i].end.lat, lines[i].end.lon);
-            lines[i].end = endPos;
+            var points = [];
+            for (var j = 0; j < lines[i].points.length; j++) {
+                var result = GPS.wgs_to_bd(lines[i].points[j].lat, lines[i].points[j].lon);
+                points.push(new BMap.Point(result.lon, result.lat));
+                console.log(lines[i].points);
+            }
             var color = "#00ff00";
             if (lines[i].color == 1) color = "#fff000";
             if (lines[i].color == 2) color = "#ff0000";
-            var polyline = new BMap.Polyline([
-            new BMap.Point(lines[i].start.lon, lines[i].start.lat),
-            new BMap.Point(lines[i].end.lon, lines[i].end.lat)
-        ], {strokeColor:color, strokeWeight:5, strokeOpacity:1});
+            console.log(points);
+            var polyline = new BMap.Polyline(points, {strokeColor:color, strokeWeight:5, strokeOpacity:1});
             map.addOverlay(polyline);
         }
     });
