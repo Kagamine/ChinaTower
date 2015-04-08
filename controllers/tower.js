@@ -1,12 +1,31 @@
 "use strict"
 var express = require('express');
 var router = express.Router();
+var wgsdis = require('../lib/wgsdis');
 
 router.get('/positions', auth.authorize, function (req, res, next) {
     db.towers.find()
         .exec()
         .then(function (towers) {
-            res.send(JSON.stringify(towers));
+            res.send(JSON.stringify(towers.map(x => x.toObject())));
+        })
+        .then(null, next);
+});
+
+router.get('/sharing', auth.authorize, function (req, res, next) {
+    db.towers.find()
+        .exec()
+        .then(function (towers) {
+            res.json(wgsdis(towers));
+        })
+        .then(null, next);
+});
+
+router.get('/share', auth.authorize, function (req, res, next) {
+    db.towers.find()
+        .exec()
+        .then(function (towers) {
+            res.render('tower/share', { title: '铁塔共享', shares: wgsdis(towers) });
         })
         .then(null, next);
 });

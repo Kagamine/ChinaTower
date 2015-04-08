@@ -1,0 +1,31 @@
+<div class="content-wrap">
+    <div class="container">
+        <h2>铁塔共享</h2>
+        <% if (shares.length > 0) { %>
+        <table class="table">
+            <thead>
+            <tr>
+                <td>铁塔1</td>
+                <td>塔型</td>
+                <td>铁塔2</td>
+                <td>塔型</td>
+                <td>距离（米）</td>
+            </tr>
+            </thead>
+            <tbody>
+            <% shares.forEach(x => { %>
+            <tr>
+                <td><%= x.begin.name %></td>
+                <td><%= x.begin.type %></td>
+                <td><%= x.end.name %></td>
+                <td><%= x.end.type %></td>
+                <td><%= x.dis %></td>
+            </tr>
+            <% }) %>
+            </tbody>
+        </table>
+        <% } else { %>
+        <p>没有符合共享条件的铁塔</p>
+        <% } %>
+    </div>
+</div>

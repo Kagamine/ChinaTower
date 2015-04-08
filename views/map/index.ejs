@@ -73,6 +73,17 @@
                     </td>
                 </tr>
                 <tr>
+                    <td class="td-gray">场景</td>
+                    <td>
+                        <select id="lstEditScene" name="scene">
+                            <option>郊区</option>
+                            <option>密集城区</option>
+                            <option>农村</option>
+                            <option>一般城区</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
                     <td class="td-gray">塔型</td>
                     <td>
                         <select id="lstEditTypes" name="type">
@@ -195,6 +206,7 @@
             }
             var pos = GPS.wgs_to_bd(towers[i].lat, towers[i].lon);
             var pt = new BMap.Point(pos.lon, pos.lat);
+            var circle = new BMap.Circle(pt, towers[i].radius * 1000, { fillColor: 'blue', strokerWeight: 1, fillOpacity: 0.1, strokeOpacity: 0.1 });
             var marker = new BMap.Marker(pt, { icon: icons[towers[i].provider][towers[i].type] });
             marker.height = towers[i].height;
             marker.name = towers[i].name;
@@ -230,6 +242,7 @@
                     window.location = e.target.url;
                 }
             });
+            map.addOverlay(circle);
             map.addOverlay(marker);
         }
     });
@@ -239,13 +252,23 @@
             for (var j = 0; j < lines[i].points.length; j++) {
                 var result = GPS.wgs_to_bd(lines[i].points[j].lat, lines[i].points[j].lon);
                 points.push(new BMap.Point(result.lon, result.lat));
-                console.log(lines[i].points);
             }
             var color = "#00ff00";
             if (lines[i].color == 1) color = "#fff000";
             if (lines[i].color == 2) color = "#ff0000";
-            console.log(points);
             var polyline = new BMap.Polyline(points, {strokeColor:color, strokeWeight:5, strokeOpacity:1});
+            map.addOverlay(polyline);
+        }
+    });
+
+    $.getJSON('/tower/sharing', {}, function (lines) {
+        for (var i = 0; i < lines.length; i++) {
+            var points = [];
+            var result = GPS.wgs_to_bd(lines[i].begin.lat, lines[i].begin.lon);
+            points.push(new BMap.Point(result.lon, result.lat));
+            result = GPS.wgs_to_bd(lines[i].end.lat, lines[i].end.lon);
+            points.push(new BMap.Point(result.lon, result.lat));
+            var polyline = new BMap.Polyline(points, {strokeColor:'purple', strokeWeight:5, strokeOpacity:1});
             map.addOverlay(polyline);
         }
     });

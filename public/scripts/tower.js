@@ -77,6 +77,7 @@ function editTower(id) {
     $('#txtHeight').val(tower.attr('data-height'));
     $('#txtUrl').val(tower.attr('data-url'));
     $('#TowerID').val(tower.attr('data-tower'));
+    $('#lstEditScene').val(tower.attr('data-scene'));
     $('#modalEditTower').modal('show');
 }
 
