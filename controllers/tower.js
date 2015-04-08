@@ -2,12 +2,22 @@
 var express = require('express');
 var router = express.Router();
 var wgsdis = require('../lib/wgsdis');
+var suggest = require('../lib/suggest');
 
 router.get('/positions', auth.authorize, function (req, res, next) {
     db.towers.find()
         .exec()
-        .then(function (towers) {
-            res.send(JSON.stringify(towers.map(x => x.toObject())));
+        .then(function (_towers) {
+            let towers = _towers.map(x => x.toObject());
+            let tmp = _.groupBy(towers, 'district');
+            for (let x in tmp)
+            {
+                let result = suggest(tmp[x]);
+                result.forEach(y => {
+                    towers.push({ lon: y.lon, lat: y.lat, radius: y.radius, virtual: true });
+                });
+            }
+            res.send(towers);
         })
         .then(null, next);
 });

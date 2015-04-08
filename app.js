@@ -1,4 +1,5 @@
 var os = require('os');
+var _ = GLOBAL._ = require('underscore');
 var express = require('express');
 var expressLayouts = require('express-ejs-layouts');
 var path = require('path');
