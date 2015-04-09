@@ -12,10 +12,12 @@ router.get('/positions', auth.authorize, function (req, res, next) {
             let tmp = _.groupBy(towers, 'district');
             for (let x in tmp)
             {
-                let result = suggest(tmp[x]);
-                result.forEach(y => {
-                    towers.push({ lon: y.lon, lat: y.lat, radius: y.radius, virtual: true });
-                });
+                if (tmp[x].length > 2) {
+                    let result = suggest(tmp[x]);
+                    result.forEach(y => {
+                        towers.push({ lon: y.lon, lat: y.lat, radius: y.radius, virtual: true });
+                    });
+                }
             }
             res.send(towers);
         })
@@ -55,6 +57,7 @@ router.get('/', auth.authorize, function (req, res, next) {
     query
         .skip((req.query.p - 1) * 50)
         .limit(50)
+        .sort({ virtual: -1 })
         .exec()
         .then(function (towers) {
             res.render('tower/raw', { layout: false, towers: towers });
@@ -89,7 +92,9 @@ router.post('/edit', auth.authorize, function (req, res, next) {
         provider: req.body.provider,
         height: req.body.height,
         type: req.body.type,
-        url: req.body.url ? req.body.url : ''
+        url: req.body.url ? req.body.url : '',
+        scene: req.body.scene,
+        virtual: req.body.virtual
     }).exec();
     res.redirect('/tower');
 });
@@ -109,6 +114,7 @@ router.post('/create', auth.authorize, function (req, res, next) {
     tower.lon = req.body.lon;
     tower.lat = req.body.lat;
     tower.url = req.body.url;
+    tower.virtual = true;
     tower.save(function (err, tower) {
         if (req.files.file) {
             let writestream = db.gfs.createWriteStream({
@@ -151,6 +157,8 @@ router.post('/import', auth.authorize, function (req, res, next) {
                 tower.height = x[4];
                 tower.lon = x[5];
                 tower.lat = x[6];
+                tower.scene = x[7];
+                tower.virtual = true;
                 tower.save();
             } catch (e) {
                 console.error(e);
@@ -158,6 +166,26 @@ router.post('/import', auth.authorize, function (req, res, next) {
         });
     }
     res.redirect('/tower');
+});
+
+router.get('/suggest', auth.authorize, function (req, res, next) {
+    db.towers.find()
+        .sort('district')
+        .exec()
+        .then(function (towers) {
+            let ret = [];
+            towers = towers.map(x => x.toObject());
+            let tmp = _.groupBy(towers, 'district');
+            for (let x in tmp)
+            {
+                let result = suggest(tmp[x]);
+                result.forEach(y => {
+                    ret.push({ lon: y.lon, lat: y.lat, radius: y.radius, district: x });
+                });
+            }
+            res.render('tower/suggest', { title: '站址推荐', suggestions: ret });
+        })
+        .then(null, next);
 });
 
 module.exports = router;

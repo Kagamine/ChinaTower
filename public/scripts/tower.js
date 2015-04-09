@@ -79,6 +79,11 @@ function editTower(id) {
     $('#TowerID').val(tower.attr('data-tower'));
     $('#lstEditScene').val(tower.attr('data-scene'));
     $('#modalEditTower').modal('show');
+    if (tower.attr('data-virtual') == 1) {
+        $('#chkVirtual').prop('checked', true);
+    } else {
+        $('#chkVirtual').prop('checked', false);
+    }
 }
 
 function deleteTower(id) {

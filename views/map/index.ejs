@@ -7,6 +7,11 @@
         font-family: "微软雅黑";
     }
 
+    body {
+        margin: 0!important;
+        padding: 0!important;
+    }
+
     #allmap {
         margin-top: 40px;
     }
@@ -44,6 +49,15 @@
         left: 15px;
         position: absolute;
     }
+    @media(max-width: 979px)
+    {
+        .navbar {
+            padding: 0 20px!important;
+        }
+        #allmap {
+            margin-top: -20px!important;
+        }
+    }
 </style>
 <div id="modalEditTower" class="modal hide fade">
     <form action="/tower/create" method="post" enctype="multipart/form-data">
@@ -76,7 +90,7 @@
                     <td class="td-gray">场景</td>
                     <td>
                         <select id="lstEditScene" name="scene">
-                            <option>郊区</option>
+                            <option selected>郊区</option>
                             <option>密集城区</option>
                             <option>农村</option>
                             <option>一般城区</option>
@@ -126,6 +140,7 @@
 <div id="allmap"></div>
 <div id="buttons">
     <a class="btn btn-success" href="javascript:myDis.open();" >测距</a>
+    <a class="btn btn-info" href="javascript:gps();" >GPS定位添加铁塔</a>
     <small style="color:gray">在地图上点击右键添加铁塔</small>
 </div>
 <div id="graphic">
@@ -209,7 +224,7 @@
             var circle = new BMap.Circle(pt, towers[i].radius * 1000, { fillColor: towers[i].virtual ? 'red' : 'green', strokerColor: towers[i].virtual ? 'red' : 'green', strokerWeight: 0.01, fillOpacity: 0.1, strokeOpacity: 0.01 });
 
             map.addOverlay(circle);
-            if (!towers[i].virtual)
+            if (!towers[i].virtual || towers[i].name)
             {
                 var marker = new BMap.Marker(pt, { icon: icons[towers[i].provider][towers[i].type] });
                 marker.height = towers[i].height;
@@ -276,4 +291,14 @@
             map.addOverlay(polyline);
         }
     });
+    function gps ()
+    {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                $('#txtLon').val(position.coords.longitude);
+                $('#txtLat').val(position.coords.latitude);
+                $('#modalEditTower').modal('show');
+            }
+        );
+    }
 </script>

@@ -1,0 +1,29 @@
+<div class="content-wrap">
+    <div class="container">
+        <h2>站址推荐</h2>
+        <% if (suggestions.length > 0) { %>
+        <table class="table">
+            <thead>
+            <tr>
+                <td>区县</td>
+                <td>经度</td>
+                <td>纬度</td>
+                <td>半径(米)</td>
+            </tr>
+            </thead>
+            <tbody>
+            <% suggestions.forEach(x => { %>
+            <tr>
+                <td><%= x.district %></td>
+                <td><%= x.lon.toFixed(7) %></td>
+                <td><%= x.lat.toFixed(7) %></td>
+                <td><%= (x.radius * 1000).toFixed(2) %></td>
+            </tr>
+            <% }) %>
+            </tbody>
+        </table>
+        <% } else { %>
+        <p>没有符合条件的站址</p>
+        <% } %>
+    </div>
+</div>
