@@ -120,8 +120,12 @@
                     <td><input name="lat" type="text" id="txtLat" placeholder="纬度" /></td>
                 </tr>
                 <tr>
+                    <td class="td-gray">详细地址</td>
+                    <td><input name="address" type="text" id="txtAddress" placeholder="详细地址" /></td>
+                </tr>
+                <tr>
                     <td class="td-gray">链接URL</td>
-                    <td><input name="url" type="text" id="txtLat" placeholder="链接URL" /></td>
+                    <td><input name="url" type="text" id="txtURL" placeholder="链接URL" /></td>
                 </tr>
                 <tr>
                     <td class="td-gray">铁塔照片</td>
@@ -212,12 +216,15 @@
         $('#txtLat').val(result.lat);
         $('#modalEditTower').modal('show');
     });
+    if (<%= !req.query.lon ? 'false' : 'true' %>)
+        map.centerAndZoom(new BMap.Point('<%= req.query.lon %>', '<%= req.query.lat %>'), 17);
     $.getJSON('/tower/positions', { series: series }, function (towers) {
         for (var i = 0; i < towers.length; i ++)
         {
             if (!init) {
                 init = true;
-                map.centerAndZoom(new BMap.Point(towers[i].lon, towers[i].lat), 12.5);
+                if (<%= req.query.lon ? 'false' : 'true' %>)
+                    map.centerAndZoom(new BMap.Point(towers[i].lon, towers[i].lat), 12.5);
             }
             var pos = GPS.wgs_to_bd(towers[i].lat, towers[i].lon);
             var pt = new BMap.Point(pos.lon, pos.lat);

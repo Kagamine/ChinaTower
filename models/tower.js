@@ -38,6 +38,37 @@ var towerSchema = new Schema({
         type: Boolean,
         index: true,
         default: false
+    },
+    address: String,
+    form: {
+        selector: String,
+        partner: String,
+        time: Date,
+        reason: {
+            type: String,
+            enum: ['覆盖', '容量', '质量', '投诉', '业务拓展', '其他']
+        },
+        method: {
+            type: String,
+            enum: ['新建独用', '新建共用', '新建共享']
+        },
+        pcRoom: {
+            type: String,
+            enum: ['自建砖混机房', '自建活动机房', 'MINI机柜', '租赁机房', '自有机房', '共享其他运营商机房', '一体化集装箱机房', '拉远无机房']
+        },
+        tower: {
+            type: String,
+            enum: ['路灯杆塔', '双轮景观塔', '灯杆景观塔', '三管塔', '插接式单管塔', '角钢塔', '落地拉线塔', '屋顶拉线塔', '增高架', '支撑杆', '抱杆', '仿生树', '其他']
+        },
+        wire: Number,
+        electric: {
+            type: String,
+            enum: ['直供电', '转供电']
+        },
+        wireHeight: String,
+        owner: String,
+        ownerContact: String,
+        photos: [{ title: String, file: Schema.Types.ObjectId }]
     }
 }, {
     toObject: {

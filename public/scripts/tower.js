@@ -70,6 +70,7 @@ function editTower(id) {
     $('#txtName').val(tower.find('.name').html());
     $('#lstEditTypes').val(tower.find('.type').html());
     $('#txtDistrict').val(tower.find('.district').html());
+    $('#txtAddress').val(tower.find('.address').html());
     $('#lstEditProviders').val(tower.attr('data-provider'));
     $('#imgTower').attr('src', '/file/download/' + tower.attr('data-picture'));
     $('#txtLon').val(tower.attr('data-lon'));

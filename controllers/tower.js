@@ -4,10 +4,31 @@ var router = express.Router();
 var wgsdis = require('../lib/wgsdis');
 var suggest = require('../lib/suggest');
 
-router.get('/positions', auth.authorize, function (req, res, next) {
+let suggestCache;
+let shareCache;
+
+function buildShareCache()
+{
+    shareCache = [];
     db.towers.find()
-        .exec()
-        .then(function (_towers) {
+        .exec(function (err, _towers) {
+            let towers = _towers.map(x => x.toObject());
+            let tmp = _.groupBy(towers, 'district');
+            for (let x in tmp)
+            {
+                let result = wgsdis(tmp[x]);
+                result.forEach(y => {
+                    shareCache.push(y);
+                });
+            }
+        });
+}
+
+function buildSuggestCache()
+{
+    suggestCache = [];
+    db.towers.find()
+        .exec(function (err, _towers) {
             let towers = _towers.map(x => x.toObject());
             let tmp = _.groupBy(towers, 'district');
             for (let x in tmp)
@@ -15,10 +36,23 @@ router.get('/positions', auth.authorize, function (req, res, next) {
                 if (tmp[x].length > 2) {
                     let result = suggest(tmp[x]);
                     result.forEach(y => {
-                        towers.push({ lon: y.lon, lat: y.lat, radius: y.radius, virtual: true });
+                        suggestCache.push({ lon: y.lon, lat: y.lat, radius: y.radius, virtual: true });
                     });
                 }
             }
+        });
+}
+
+router.get('/positions', auth.authorize, function (req, res, next) {
+    db.towers.find()
+        .exec()
+        .then(function (_towers) {
+            let towers = _towers.map(x => x.toObject());
+            if (!suggestCache)
+                buildSuggestCache();
+            suggestCache.forEach(x => {
+                towers.push(x);
+            });
             res.send(towers);
         })
         .then(null, next);
@@ -28,7 +62,8 @@ router.get('/sharing', auth.authorize, function (req, res, next) {
     db.towers.find()
         .exec()
         .then(function (towers) {
-            res.json(wgsdis(towers));
+            if (!shareCache) buildShareCache();
+            res.json(shareCache);
         })
         .then(null, next);
 });
@@ -37,7 +72,8 @@ router.get('/share', auth.authorize, function (req, res, next) {
     db.towers.find()
         .exec()
         .then(function (towers) {
-            res.render('tower/share', { title: '铁塔共享', shares: wgsdis(towers) });
+            if (!shareCache) buildShareCache();
+            res.render('tower/share', { title: '铁塔共享', shares: shareCache });
         })
         .then(null, next);
 });
@@ -94,6 +130,7 @@ router.post('/edit', auth.authorize, function (req, res, next) {
         type: req.body.type,
         url: req.body.url ? req.body.url : '',
         scene: req.body.scene,
+        address: req.body.address,
         virtual: req.body.virtual
     }).exec();
     res.redirect('/tower');
@@ -114,7 +151,10 @@ router.post('/create', auth.authorize, function (req, res, next) {
     tower.lon = req.body.lon;
     tower.lat = req.body.lat;
     tower.url = req.body.url;
+    tower.address = req.body.address;
     tower.virtual = true;
+    suggestCache = null;
+    shareCache = null;
     tower.save(function (err, tower) {
         if (req.files.file) {
             let writestream = db.gfs.createWriteStream({
@@ -158,12 +198,15 @@ router.post('/import', auth.authorize, function (req, res, next) {
                 tower.lon = x[5];
                 tower.lat = x[6];
                 tower.scene = x[7];
-                tower.virtual = true;
+                tower.address = x[8];
+                tower.virtual = false;
                 tower.save();
             } catch (e) {
                 console.error(e);
             }
         });
+        suggestCache = null;
+        shareCache = null;
     }
     res.redirect('/tower');
 });
@@ -175,14 +218,11 @@ router.get('/suggest', auth.authorize, function (req, res, next) {
         .then(function (towers) {
             let ret = [];
             towers = towers.map(x => x.toObject());
-            let tmp = _.groupBy(towers, 'district');
-            for (let x in tmp)
-            {
-                let result = suggest(tmp[x]);
-                result.forEach(y => {
-                    ret.push({ lon: y.lon, lat: y.lat, radius: y.radius, district: x });
-                });
-            }
+            if (!suggestCache)
+                buildSuggestCache();
+            suggestCache.forEach(x => {
+                towers.push(x);
+            });
             res.render('tower/suggest', { title: '站址推荐', suggestions: ret });
         })
         .then(null, next);
