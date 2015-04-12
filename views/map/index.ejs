@@ -194,6 +194,11 @@
     <% } %>
     var icons = {};
     var init = false;
+    if (!init) {
+        init = true;
+        if (<%= req.query.lon ? 'false' : 'true' %>)
+            map.centerAndZoom(new BMap.Point(123.98318, 47.32063), 17);
+    }
     icons['China Mobile'] = {};
     icons['China Mobile']['B'] = new BMap.Icon("/images/cm-b.png", new BMap.Size(30, 30));
     icons['China Mobile']['T'] = new BMap.Icon("/images/cm-t.png", new BMap.Size(30, 30));
@@ -216,88 +221,108 @@
         $('#txtLat').val(result.lat);
         $('#modalEditTower').modal('show');
     });
-    if (<%= !req.query.lon ? 'false' : 'true' %>)
-        map.centerAndZoom(new BMap.Point('<%= req.query.lon %>', '<%= req.query.lat %>'), 17);
-    $.getJSON('/tower/positions', { series: series }, function (towers) {
-        for (var i = 0; i < towers.length; i ++)
-        {
-            if (!init) {
-                init = true;
-                if (<%= req.query.lon ? 'false' : 'true' %>)
-                    map.centerAndZoom(new BMap.Point(towers[i].lon, towers[i].lat), 12.5);
-            }
-            var pos = GPS.wgs_to_bd(towers[i].lat, towers[i].lon);
-            var pt = new BMap.Point(pos.lon, pos.lat);
-            var circle = new BMap.Circle(pt, towers[i].radius * 1000, { fillColor: towers[i].virtual ? 'red' : 'green', strokerColor: towers[i].virtual ? 'red' : 'green', strokerWeight: 0.01, fillOpacity: 0.1, strokeOpacity: 0.01 });
+    if (<%= !req.query.lon ? 'false' : 'true' %>) {
+        var center = GPS.wgs_to_bd('<%= req.query.lat %>', '<%= req.query.lon %>');
+        map.centerAndZoom(new BMap.Point(center.lon, center.lat), 17);
+    }
 
-            map.addOverlay(circle);
-            if (!towers[i].virtual || towers[i].name)
+    map.addEventListener("dragend", function () {
+        BuildOverlays();
+    });
+    map.addEventListener("zoomend", function ()  {
+        BuildOverlays();
+    });
+    BuildOverlays();
+    function BuildOverlays()
+    {
+        map.clearOverlays();
+        var cp = map.getBounds(); //返回map可视区域，以地理坐标表示
+        var sw = cp.getSouthWest(); //返回矩形区域的西南角
+        var ne = cp.getNorthEast(); //返回矩形区域的东北角
+        console.log(sw, ne);
+        var tmp1 = GPS.bd_to_wgs(sw.lat, sw.lng);
+        var tmp2 = GPS.bd_to_wgs(ne.lat, ne.lng);
+        var left = tmp1.lon;
+        var right = tmp2.lon;
+        var top = tmp2.lat;
+        var bottom = tmp1.lat;
+        console.log({ left: left, right: right, top: top, bottom: bottom });
+        $.getJSON('/tower/positions', { series: series, left: left, right: right, top: top, bottom: bottom }, function (towers) {
+            for (var i = 0; i < towers.length; i ++)
             {
-                var marker = new BMap.Marker(pt, { icon: icons[towers[i].provider][towers[i].type] });
-                marker.height = towers[i].height;
-                marker.name = towers[i].name;
-                marker.district = towers[i].district;
-                marker.provider = towers[i].provider;
-                marker.picture = towers[i].picture;
-                marker.type = towers[i].type;
-                marker.url = towers[i].url;
-                marker.addEventListener("mouseover", function (e) {
-                    var x = event.clientX;
-                    var y = event.clientY;
-                    $("#tower-name").html(e.target.name);
-                    $("#tower-district").html(e.target.district);
-                    if (e.target.provider == 'China Mobile') {
-                        $("#tower-provider").html('中国移动');
-                    } else if (e.target.provider == 'China Telecom') {
-                        $("#tower-provider").html('中国电信');
-                    } else {
-                        $("#tower-provider").html('中国联通');
-                    }
-                    $("#tower-picture").attr('src', '/file/download/' + e.target.picture);
-                    $("#tower-type").html(e.target.type);
-                    $("#tower-height").html(e.target.height);
-                    $("#tower").css("left", x);
-                    $("#tower").css("top", y);
-                    $("#tower").show();
-                });
-                marker.addEventListener("mouseout", function (e) {
-                    $("#tower").hide();
-                });
-                marker.addEventListener("click", function (e) {
-                    if (e.target.url) {
-                        window.location = e.target.url;
-                    }
-                });
-                map.addOverlay(marker);
-            }
-        }
-    });
-    $.getJSON('/map', {}, function (lines) {
-        for (var i = 0; i < lines.length; i++) {
-            var points = [];
-            for (var j = 0; j < lines[i].points.length; j++) {
-                var result = GPS.wgs_to_bd(lines[i].points[j].lat, lines[i].points[j].lon);
-                points.push(new BMap.Point(result.lon, result.lat));
-            }
-            var color = "#00ff00";
-            if (lines[i].color == 1) color = "#fff000";
-            if (lines[i].color == 2) color = "#ff0000";
-            var polyline = new BMap.Polyline(points, {strokeColor:color, strokeWeight:5, strokeOpacity:1});
-            map.addOverlay(polyline);
-        }
-    });
+                var pos = GPS.wgs_to_bd(towers[i].lat, towers[i].lon);
+                var pt = new BMap.Point(pos.lon, pos.lat);
+                var circle = new BMap.Circle(pt, towers[i].radius * 1000, { fillColor: towers[i].virtual ? 'red' : 'green', strokerColor: towers[i].virtual ? 'red' : 'green', strokerWeight: 0.01, fillOpacity: 0.1, strokeOpacity: 0.01 });
 
-    $.getJSON('/tower/sharing', {}, function (lines) {
-        for (var i = 0; i < lines.length; i++) {
-            var points = [];
-            var result = GPS.wgs_to_bd(lines[i].begin.lat, lines[i].begin.lon);
-            points.push(new BMap.Point(result.lon, result.lat));
-            result = GPS.wgs_to_bd(lines[i].end.lat, lines[i].end.lon);
-            points.push(new BMap.Point(result.lon, result.lat));
-            var polyline = new BMap.Polyline(points, {strokeColor:'purple', strokeWeight:5, strokeOpacity:1});
-            map.addOverlay(polyline);
-        }
-    });
+                map.addOverlay(circle);
+                if (!towers[i].virtual || towers[i].name)
+                {
+                    var marker = new BMap.Marker(pt, { icon: icons[towers[i].provider][towers[i].type] });
+                    marker.height = towers[i].height;
+                    marker.name = towers[i].name;
+                    marker.district = towers[i].district;
+                    marker.provider = towers[i].provider;
+                    marker.picture = towers[i].picture;
+                    marker.type = towers[i].type;
+                    marker.url = towers[i].url;
+                    marker.addEventListener("mouseover", function (e) {
+                        var x = event.clientX;
+                        var y = event.clientY;
+                        $("#tower-name").html(e.target.name);
+                        $("#tower-district").html(e.target.district);
+                        if (e.target.provider == 'China Mobile') {
+                            $("#tower-provider").html('中国移动');
+                        } else if (e.target.provider == 'China Telecom') {
+                            $("#tower-provider").html('中国电信');
+                        } else {
+                            $("#tower-provider").html('中国联通');
+                        }
+                        $("#tower-picture").attr('src', '/file/download/' + e.target.picture);
+                        $("#tower-type").html(e.target.type);
+                        $("#tower-height").html(e.target.height);
+                        $("#tower").css("left", x);
+                        $("#tower").css("top", y);
+                        $("#tower").show();
+                    });
+                    marker.addEventListener("mouseout", function (e) {
+                        $("#tower").hide();
+                    });
+                    marker.addEventListener("click", function (e) {
+                        if (e.target.url) {
+                            window.location = e.target.url;
+                        }
+                    });
+                    map.addOverlay(marker);
+                }
+            }
+        });
+        $.getJSON('/map', { left: left, right: right, top: top, bottom: bottom }, function (lines) {
+            for (var i = 0; i < lines.length; i++) {
+                var points = [];
+                for (var j = 0; j < lines[i].points.length; j++) {
+                    var result = GPS.wgs_to_bd(lines[i].points[j].lat, lines[i].points[j].lon);
+                    points.push(new BMap.Point(result.lon, result.lat));
+                }
+                var color = "#00ff00";
+                if (lines[i].color == 1) color = "#fff000";
+                if (lines[i].color == 2) color = "#ff0000";
+                var polyline = new BMap.Polyline(points, {strokeColor:color, strokeWeight:5, strokeOpacity:1});
+                map.addOverlay(polyline);
+            }
+        });
+
+        $.getJSON('/tower/sharing', { left: left, right: right, top: top, bottom: bottom }, function (lines) {
+            for (var i = 0; i < lines.length; i++) {
+                var points = [];
+                var result = GPS.wgs_to_bd(lines[i].begin.lat, lines[i].begin.lon);
+                points.push(new BMap.Point(result.lon, result.lat));
+                result = GPS.wgs_to_bd(lines[i].end.lat, lines[i].end.lon);
+                points.push(new BMap.Point(result.lon, result.lat));
+                var polyline = new BMap.Polyline(points, {strokeColor:'purple', strokeWeight:5, strokeOpacity:1});
+                map.addOverlay(polyline);
+            }
+        });
+    }
     function gps ()
     {
         navigator.geolocation.getCurrentPosition(

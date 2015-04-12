@@ -15,9 +15,9 @@
             <tbody>
             <% shares.forEach(x => { %>
             <tr>
-                <td><%= x.begin.name %></td>
+                <td><%= x.begin.name %>(<%= x.begin.virtual ? '新' : '老' %>)</td>
                 <td><%= x.begin.type %></td>
-                <td><a href="/?lon=<%= x.lon %>&lat=<%= x.lat %>"><%= x.end.name %></a></td>
+                <td><a href="/?lon=<%= x.lon %>&lat=<%= x.lat %>"><%= x.end.name %>(<%= x.end.virtual ? '新' : '老' %>)</a></td>
                 <td><%= x.end.type %></td>
                 <td><%= x.dis %></td>
             </tr>

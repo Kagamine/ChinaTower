@@ -13,9 +13,10 @@ router.get('/', auth.authorize, function (req, res, next) {
                 .sort({ order: 1 })
                 .exec()
                 .then(function (lines) {
-                    console.log(lines.length + '条折线读取完毕');
-                    rxlevCache[req.query.series] = JSON.stringify(lines);
-                    res.send(rxlevCache[req.query.series]);
+                    rxlevCache[req.query.series] = lines;
+                    let result = rxlevCache[req.query.series].filter(x => x.points.some(y => parseFloat(y.lon) >= parseFloat(req.query.left) && parseFloat(y.lon) <= parseFloat(req.query.right) && parseFloat(y.lat) >= req.query.bottom && parseFloat(y.lat) <= parseFloat(req.query.top)));
+                    console.log(result.length);
+                    res.send(result);
                 })
                 .then(null, next);
         }
@@ -34,10 +35,11 @@ router.get('/', auth.authorize, function (req, res, next) {
                     db.rxlevLines.find({ series: seriesId })
                         .sort({ order: 1 })
                         .exec()
-                        .then(function (lines) {
-                            console.log(lines.length + '条折线读取完毕');
-                            rxlevCache[req.query.series] = JSON.stringify(lines);
-                            res.send(rxlevCache[req.query.series]);
+                            .then(function (lines) {
+                            rxlevCache[req.query.series] = lines;
+                            let result = rxlevCache[req.query.series].filter(x => x.points.some(y => parseFloat(y.lon) >= parseFloat(req.query.left) && parseFloat(y.lon) <= parseFloat(req.query.right) && parseFloat(y.lat) >= req.query.bottom && parseFloat(y.lat) <= parseFloat(req.query.top)));
+                            console.log(result.length);
+                            res.send(result);
                         })
                         .then(null, next);
                 }

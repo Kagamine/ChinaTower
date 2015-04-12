@@ -53,29 +53,20 @@ router.get('/positions', auth.authorize, function (req, res, next) {
             suggestCache.forEach(x => {
                 towers.push(x);
             });
+            towers = towers.filter(x => parseFloat(x.lon) >= parseFloat(req.query.left) && parseFloat(x.lon) <= parseFloat(req.query.right) && parseFloat(x.lat) >= req.query.bottom && parseFloat(x.lat) <= parseFloat(req.query.top));
             res.send(towers);
         })
         .then(null, next);
 });
 
 router.get('/sharing', auth.authorize, function (req, res, next) {
-    db.towers.find()
-        .exec()
-        .then(function (towers) {
-            if (!shareCache) buildShareCache();
-            res.json(shareCache);
-        })
-        .then(null, next);
+    if (!shareCache) buildShareCache();
+    res.json(shareCache.filter(x => parseFloat(x.lon) >= parseFloat(req.query.left) && parseFloat(x.lon) <= parseFloat(req.query.right) && parseFloat(x.lat) >= req.query.bottom && parseFloat(x.lat) <= parseFloat(req.query.top)));
 });
 
 router.get('/share', auth.authorize, function (req, res, next) {
-    db.towers.find()
-        .exec()
-        .then(function (towers) {
-            if (!shareCache) buildShareCache();
-            res.render('tower/share', { title: '铁塔共享', shares: shareCache });
-        })
-        .then(null, next);
+    if (!shareCache) buildShareCache();
+    res.render('tower/share', { title: '铁塔共享', shares: shareCache });
 });
 
 router.get('/', auth.authorize, function (req, res, next) {
@@ -199,7 +190,7 @@ router.post('/import', auth.authorize, function (req, res, next) {
                 tower.lat = x[6];
                 tower.scene = x[7];
                 tower.address = x[8];
-                tower.virtual = false;
+                tower.virtual = req.body.virtual;
                 tower.save();
             } catch (e) {
                 console.error(e);
@@ -223,7 +214,7 @@ router.get('/suggest', auth.authorize, function (req, res, next) {
             suggestCache.forEach(x => {
                 towers.push(x);
             });
-            res.render('tower/suggest', { title: '站址推荐', suggestions: ret });
+            res.render('tower/suggest', { title: '站址推荐', suggestions: suggestCache });
         })
         .then(null, next);
 });

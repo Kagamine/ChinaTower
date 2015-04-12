@@ -2,8 +2,14 @@ var mongodb = require('../models/mongodb');
 var Schema = mongodb.mongoose.Schema;
 
 var towerSchema = new Schema({
-    lat: String,
-    lon: String,
+    lat: {
+        type: Number,
+        index: true
+    },
+    lon: {
+        type: Number,
+        index: true
+    },
     district: {
         type: String,
         index: true
