@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://tower:123456@localhost/tower', {
+mongoose.connect('mongodb://tower:123456@chinatower.chinacloudapp.cn/tower', {
     server: {
         auto_reconnect: true,
         socketOptions:{

@@ -3,6 +3,7 @@ var express = require('express');
 var router = express.Router();
 var wgsdis = require('../lib/wgsdis');
 var suggest = require('../lib/suggest');
+var combine = require('../lib/combine');
 
 let suggestCache;
 let shareCache;
@@ -36,7 +37,7 @@ function buildSuggestCache()
                 if (tmp[x].length > 2) {
                     let result = suggest(tmp[x]);
                     result.forEach(y => {
-                        suggestCache.push({ lon: y.lon, lat: y.lat, radius: y.radius, virtual: true });
+                        suggestCache.push({ lon: y.lon, lat: y.lat, radius: y.radius, status: '预选' });
                     });
                 }
             }
@@ -54,6 +55,7 @@ router.get('/positions', auth.authorize, function (req, res, next) {
                 towers.push(x);
             });
             towers = towers.filter(x => parseFloat(x.lon) >= parseFloat(req.query.left) && parseFloat(x.lon) <= parseFloat(req.query.right) && parseFloat(x.lat) >= req.query.bottom && parseFloat(x.lat) <= parseFloat(req.query.top));
+            towers = combine(towers, req.query.left, req.query.right, req.query.top, req.query.bottom);
             res.send(towers);
         })
         .then(null, next);
@@ -66,7 +68,12 @@ router.get('/sharing', auth.authorize, function (req, res, next) {
 
 router.get('/share', auth.authorize, function (req, res, next) {
     if (!shareCache) buildShareCache();
-    res.render('tower/share', { title: '铁塔共享', shares: shareCache });
+    res.render('tower/share', { title: '整合分析', shares: shareCache.filter(x => x.begin.status != '预备' && x.end.status != '预备') });
+});
+
+router.get('/newap', auth.authorize, function (req, res, next) {
+    if (!shareCache) buildShareCache();
+    res.render('tower/share', { title: '新建分析', shares: shareCache.filter(x => x.begin.status == '预备' || x.end.status == '预备') });
 });
 
 router.get('/', auth.authorize, function (req, res, next) {
@@ -81,10 +88,12 @@ router.get('/', auth.authorize, function (req, res, next) {
         query = query.where({ provider: new RegExp('.*' + req.query.provider + '.*') });
     if (req.query.name)
         query = query.where({ name: new RegExp('.*' + req.query.name + '.*') });
+    if (req.query.status)
+        query = query.where({ status: req.query.status });
     query
         .skip((req.query.p - 1) * 50)
         .limit(50)
-        .sort({ virtual: -1 })
+        .sort({ status: -1 })
         .exec()
         .then(function (towers) {
             res.render('tower/raw', { layout: false, towers: towers });
@@ -121,8 +130,8 @@ router.post('/edit', auth.authorize, function (req, res, next) {
         type: req.body.type,
         url: req.body.url ? req.body.url : '',
         scene: req.body.scene,
-        address: req.body.address,
-        virtual: req.body.virtual
+        address: req.body.address || '',
+        status: req.body.status
     }).exec();
     res.redirect('/tower');
 });
@@ -142,8 +151,8 @@ router.post('/create', auth.authorize, function (req, res, next) {
     tower.lon = req.body.lon;
     tower.lat = req.body.lat;
     tower.url = req.body.url;
-    tower.address = req.body.address;
-    tower.virtual = true;
+    tower.address = req.body.address || '';
+    tower.status = req.body.status;
     suggestCache = null;
     shareCache = null;
     tower.save(function (err, tower) {
@@ -190,7 +199,7 @@ router.post('/import', auth.authorize, function (req, res, next) {
                 tower.lat = x[6];
                 tower.scene = x[7];
                 tower.address = x[8];
-                tower.virtual = req.body.virtual;
+                tower.status = req.body.status;
                 tower.save();
             } catch (e) {
                 console.error(e);

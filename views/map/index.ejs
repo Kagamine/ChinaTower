@@ -17,7 +17,7 @@
     }
 
     #graphic {
-        width: 120px;
+        width: 90px;
         position: absolute;
         bottom: 20px;
         right: 20px;
@@ -168,6 +168,10 @@
             <td id="tower-name"></td>
         </tr>
         <tr>
+            <td class="td-gray">属性</td>
+            <td id="tower-status"></td>
+        </tr>
+        <tr>
             <td class="td-gray">所属地区</td>
             <td id="tower-district"></td>
         </tr>
@@ -239,23 +243,21 @@
         var cp = map.getBounds(); //返回map可视区域，以地理坐标表示
         var sw = cp.getSouthWest(); //返回矩形区域的西南角
         var ne = cp.getNorthEast(); //返回矩形区域的东北角
-        console.log(sw, ne);
         var tmp1 = GPS.bd_to_wgs(sw.lat, sw.lng);
         var tmp2 = GPS.bd_to_wgs(ne.lat, ne.lng);
         var left = tmp1.lon;
         var right = tmp2.lon;
         var top = tmp2.lat;
         var bottom = tmp1.lat;
-        console.log({ left: left, right: right, top: top, bottom: bottom });
         $.getJSON('/tower/positions', { series: series, left: left, right: right, top: top, bottom: bottom }, function (towers) {
             for (var i = 0; i < towers.length; i ++)
             {
                 var pos = GPS.wgs_to_bd(towers[i].lat, towers[i].lon);
                 var pt = new BMap.Point(pos.lon, pos.lat);
-                var circle = new BMap.Circle(pt, towers[i].radius * 1000, { fillColor: towers[i].virtual ? 'red' : 'green', strokerColor: towers[i].virtual ? 'red' : 'green', strokerWeight: 0.01, fillOpacity: 0.1, strokeOpacity: 0.01 });
+                var circle = new BMap.Circle(pt, towers[i].radius * 1000, { fillColor: towers[i].status == '预选' ? 'red' : 'green', strokerColor: towers[i].status == '预选' ? 'red' : 'green', strokerWeight: 0.01, fillOpacity: 0.1, strokeOpacity: 0.01 });
 
                 map.addOverlay(circle);
-                if (!towers[i].virtual || towers[i].name)
+                if (!towers[i].status == '预选' || towers[i].name)
                 {
                     var marker = new BMap.Marker(pt, { icon: icons[towers[i].provider][towers[i].type] });
                     marker.height = towers[i].height;
@@ -265,10 +267,12 @@
                     marker.picture = towers[i].picture;
                     marker.type = towers[i].type;
                     marker.url = towers[i].url;
+                    marker.status = towers[i].status;
                     marker.addEventListener("mouseover", function (e) {
                         var x = event.clientX;
                         var y = event.clientY;
                         $("#tower-name").html(e.target.name);
+                        $("#tower-status").html(e.target.status);
                         $("#tower-district").html(e.target.district);
                         if (e.target.provider == 'China Mobile') {
                             $("#tower-provider").html('中国移动');
@@ -296,7 +300,7 @@
                 }
             }
         });
-        $.getJSON('/map', { left: left, right: right, top: top, bottom: bottom }, function (lines) {
+        $.getJSON('/signal/rxlev', { left: left, right: right, top: top, bottom: bottom }, function (lines) {
             for (var i = 0; i < lines.length; i++) {
                 var points = [];
                 for (var j = 0; j < lines[i].points.length; j++) {

@@ -1,0 +1,12 @@
+<% towers.forEach(x => { %>
+<a href="<%= x.url %>">
+    <div class="tower-pano-item">
+        <img src="<%= x.picUrl %>" class="tower-pano-icon" />
+        <br />
+        <br />
+        <%= x.name %> (<%= x.status %>)
+        <br />
+        <%= x.address %>
+    </div>
+</a>
+<% }) %>

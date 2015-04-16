@@ -1,3 +1,8 @@
+<style>
+    select, input[type="text"] {
+        width: 160px!important;
+    }
+</style>
 <div id="modalImportTowers" class="modal hide fade">
     <form action="/tower/import" method="post" enctype="multipart/form-data">
         <div class="modal-header">
@@ -11,8 +16,15 @@
                     <td><input name="file" type="file" /></td>
                 </tr>
                 <tr>
-                    <td class="td-gray">新站址?</td>
-                    <td><input name="virtual" type="checkbox" /></td>
+                    <td class="td-gray">属性</td>
+                    <td>
+                        <select name="status">
+                            <option value="正常">正常</option>
+                            <option value="预选">预选</option>
+                            <option value="难点">难点</option>
+                            <option value="储备">储备</option>
+                        </select>
+                    </td>
                 </tr>
             </table>
         </div>
@@ -84,11 +96,17 @@
                 </tr>
                 <tr>
                     <td class="td-gray">详细地址</td>
-                    <td><input name="address" type="text" id="txtAddress" placeholder="详细地址" /></td>
+                    <td><input name="address" type="text" id="txtAddress" placeholder="详细地址" value="" /></td>
                 </tr>
                 <tr>
-                    <td class="td-gray">预选站址</td>
-                    <td><input name="virtual" type="checkbox" id="chkVirtual" /></td>
+                    <td class="td-gray">属性</td>
+                    <td>
+                        <select name="status" id="lstStatus">
+                            <option value="正常">正常</option>
+                            <option value="预选">预选</option>
+                            <option value="难点">难点</option>
+                            <option value="储备">储备</option>
+                        </select></td>
                 </tr>
                 <tr>
                     <td class="td-gray">链接URL</td>
@@ -127,6 +145,13 @@
                     <option value="Z">Z</option>
                 </select>
                 <input type="text" placeholder="地区" id="txtSearchDistrict" />
+                <select id="lstSearchStatus">
+                    <option value="">属性</option>
+                    <option value="正常">正常</option>
+                    <option value="预选">预选</option>
+                    <option value="难点">难点</option>
+                    <option value="储备">储备</option>
+                </select>
                 <button role="button" class="btn btn-primary" id="btnSearchTower">检索</button>
                 <a href="javascript:$('#modalImportTowers').modal('show')" class="btn btn-success" style="float:right">导入铁塔数据</a>
             </p>
@@ -140,7 +165,7 @@
             <th>场景</th>
             <th>塔型</th>
             <th>高度</th>
-            <th>状态</th>
+            <th>属性</th>
             <th>操作</th>
             </thead>
             <tbody class="tower-list"></tbody>

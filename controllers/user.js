@@ -1,4 +1,4 @@
-"use strict"
+'use strict'
 var express = require('express');
 var crypto = require('../lib/cryptography');
 var router = express.Router();

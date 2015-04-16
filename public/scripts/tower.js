@@ -16,9 +16,27 @@ function loadTowers() {
             provider: $('#lstProviders').val(),
             type: $('#lstTypes').val(),
             district: $('#txtSearchDistrict').val(),
-            name: $('#txtSearchName').val()
+            name: $('#txtSearchName').val(),
+            status: $('#lstSearchStatus').val()
         }, function (html) {
             $('.tower-list').append(html);
+            page ++;
+            lock = false;
+        });
+    }
+    if ($('.tower-pano-list').length > 0) {
+        if (lock) return;
+        lock = true;
+        $.get('/pano', {
+            raw: true,
+            p: page,
+            provider: $('#lstProviders').val(),
+            type: $('#lstTypes').val(),
+            district: $('#txtSearchDistrict').val(),
+            name: $('#txtSearchName').val(),
+            status: $('#lstSearchStatus').val()
+        }, function (html) {
+            $('.tower-pano-list').append(html);
             page ++;
             lock = false;
         });
@@ -36,6 +54,7 @@ $(document).ready(function () {
     load();
     $('#btnSearchTower').click(function () {
         $('.tower-list').html('');
+        $('.tower-pano-list').html('');
         page = 1;
         lock = false;
         load();
@@ -79,12 +98,8 @@ function editTower(id) {
     $('#txtUrl').val(tower.attr('data-url'));
     $('#TowerID').val(tower.attr('data-tower'));
     $('#lstEditScene').val(tower.attr('data-scene'));
+    $('#lstStatus').val(tower.attr('data-status'));
     $('#modalEditTower').modal('show');
-    if (tower.attr('data-virtual') == 1) {
-        $('#chkVirtual').prop('checked', true);
-    } else {
-        $('#chkVirtual').prop('checked', false);
-    }
 }
 
 function deleteTower(id) {

@@ -20,6 +20,9 @@ var map = require('./controllers/map');
 var file = require('./controllers/file');
 var user = require('./controllers/user');
 var signal = require('./controllers/signal');
+var pano = require('./controllers/pano');
+var statistics = require('./controllers/statistics');
+var setting = require('./controllers/setting');
 
 var app = express();
 app.use(expressLayouts);
@@ -55,6 +58,9 @@ app.use('/map', map);
 app.use('/file', file);
 app.use('/user', user);
 app.use('/signal', signal);
+app.use('/pano', pano);
+app.use('/statistics', statistics);
+app.use('/setting', setting);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

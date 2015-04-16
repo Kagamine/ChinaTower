@@ -5,13 +5,7 @@ var router = express.Router();
 /* GET home page. */
 
 router.get('/', auth.authorize, function(req, res, next) {
-    res.render('map/index', { title: '地图展示' });
-});
-
-router.get('/update', function (req, res, next) {
-    db.towers.update({  }, {
-        picture: "551016af520dd4080c03d5dd"
-    }, {multi: true}).exec();
+    res.render('home/index', { title: '黑龙江省铁塔公司规划系统' });
 });
 
 module.exports = router;

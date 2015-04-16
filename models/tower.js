@@ -20,6 +20,10 @@ var towerSchema = new Schema({
         enum: ['B', 'T', 'Z'],
         index: true
     },
+    city: {
+        type: String,
+        index: true
+    },
     provider: {
         type: String,
         enum: ['China Telecom', 'China Mobile', 'China Unicom'],
@@ -40,10 +44,11 @@ var towerSchema = new Schema({
         enum: ['郊区', '密集城区', '农村', '一般城区'],
         default: '一般城区'
     },
-    virtual: {
-        type: Boolean,
+    status: {
+        type: String,
+        enum: ['正常', '预选', '难点', '储备'],
         index: true,
-        default: false
+        default: '正常'
     },
     address: String,
     form: {
