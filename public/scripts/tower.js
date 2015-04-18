@@ -87,6 +87,7 @@ $(document).ready(function () {
 function editTower(id) {
     var tower = $('tr[data-tower="' + id + '"]');
     $('#txtName').val(tower.find('.name').html());
+    $('#txtCity').val(tower.find('.city').html());
     $('#lstEditTypes').val(tower.find('.type').html());
     $('#txtDistrict').val(tower.find('.district').html());
     $('#txtAddress').val(tower.find('.address').html());

@@ -29,6 +29,10 @@
                     <td><input name="password" type="password" placeholder="密码" /></td>
                 </tr>
                 <tr>
+                    <td class="td-gray">城市权限</td>
+                    <td><input name="city" type="text" placeholder="不填写则不限制" /></td>
+                </tr>
+                <tr>
                     <td class="td-gray">电子邮箱</td>
                     <td><input name="email" type="text" placeholder="电子邮箱" /></td>
                 </tr>
@@ -48,6 +52,7 @@
             <thead>
             <th>用户名</th>
             <th>电子邮箱</th>
+            <th>权限</th>
             <th>操作</th>
             </thead>
             <tbody>
@@ -55,6 +60,7 @@
             <tr data-user="<%= x._id %>">
                 <td><%= x.username %></td>
                 <td><%= x.email %></td>
+                <td><%= x.city || '超级管理员' %></td>
                 <td>
                     <a href="javascript:;" class="btn btn-info btn-small edit-user">修改密码</a>
                     <% if (req.session.uid != x._id) { %>

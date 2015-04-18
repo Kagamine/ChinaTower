@@ -97,7 +97,6 @@ router.get('/rxlev', auth.authorize, function (req, res, next) {
                 .then(function (lines) {
                     rxlevCache[req.query.series] = lines;
                     let result = rxlevCache[req.query.series].filter(x => x.points.some(y => parseFloat(y.lon) >= parseFloat(req.query.left) && parseFloat(y.lon) <= parseFloat(req.query.right) && parseFloat(y.lat) >= req.query.bottom && parseFloat(y.lat) <= parseFloat(req.query.top)));
-                    console.log(result.length);
                     res.send(result);
                 })
                 .then(null, next);

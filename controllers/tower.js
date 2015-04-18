@@ -56,6 +56,8 @@ router.get('/positions', auth.authorize, function (req, res, next) {
             });
             towers = towers.filter(x => parseFloat(x.lon) >= parseFloat(req.query.left) && parseFloat(x.lon) <= parseFloat(req.query.right) && parseFloat(x.lat) >= req.query.bottom && parseFloat(x.lat) <= parseFloat(req.query.top));
             towers = combine(towers, req.query.left, req.query.right, req.query.top, req.query.bottom);
+            if (res.locals.currentUser.city)
+                towers = towers.filter(x => x.city == res.locals.currentUser.city);
             res.send(towers);
         })
         .then(null, next);
@@ -90,6 +92,8 @@ router.get('/', auth.authorize, function (req, res, next) {
         query = query.where({ name: new RegExp('.*' + req.query.name + '.*') });
     if (req.query.status)
         query = query.where({ status: req.query.status });
+    if (!res.locals.isMaster)
+        query = query.where({ city: res.locals.currentUser.city });
     query
         .skip((req.query.p - 1) * 50)
         .limit(50)
@@ -120,7 +124,7 @@ router.post('/edit', auth.authorize, function (req, res, next) {
             }).exec();
         });
     }
-    db.towers.update({ _id: req.body.id }, {
+    let opt = {
         lon: req.body.lon,
         lat: req.body.lat,
         name: req.body.name,
@@ -128,11 +132,16 @@ router.post('/edit', auth.authorize, function (req, res, next) {
         provider: req.body.provider,
         height: req.body.height,
         type: req.body.type,
-        url: req.body.url ? req.body.url : '',
+        url: req.body.url || '',
         scene: req.body.scene,
         address: req.body.address || '',
         status: req.body.status
-    }).exec();
+    };
+    if (!res.locals.isMaster)
+        opt.city = req.locals.currentUser.city;
+    else
+        opt.city = req.body.city || '';
+    db.towers.update({ _id: req.body.id }, opt).exec();
     res.redirect('/tower');
 });
 
@@ -151,6 +160,10 @@ router.post('/create', auth.authorize, function (req, res, next) {
     tower.lon = req.body.lon;
     tower.lat = req.body.lat;
     tower.url = req.body.url;
+    if (res.locals.currentUser.city)
+        tower.city = res.locals.currentUser.city;
+    else
+        tower.city = req.body.city || '';
     tower.address = req.body.address || '';
     tower.status = req.body.status;
     suggestCache = null;
@@ -200,6 +213,10 @@ router.post('/import', auth.authorize, function (req, res, next) {
                 tower.scene = x[7];
                 tower.address = x[8];
                 tower.status = req.body.status;
+                if (res.locals.currentUser.city)
+                    tower.city = res.locals.currentUser.city;
+                else
+                    tower.city = x[9];
                 tower.save();
             } catch (e) {
                 console.error(e);
