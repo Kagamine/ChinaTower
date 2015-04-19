@@ -145,7 +145,7 @@
                     <option value="China Telecom">中国电信</option>
                     <option value="China Unicom">中国联通</option>
                 </select>
-                <select id="lstTypes">
+                <select id="lstTypes" style="width:60px!important">
                     <option value="">塔型</option>
                     <option value="B">B</option>
                     <option value="T">T</option>
@@ -161,6 +161,7 @@
                     <option value="储备">储备</option>
                 </select>
                 <button role="button" class="btn btn-primary" id="btnSearchTower">检索</button>
+                <a href="javascript:exportTowers()" class="btn btn-info">导出</a>
             </p>
         </div>
         <p><a href="javascript:DeleteTowers()" class="btn btn-danger">批量删除</a></p>

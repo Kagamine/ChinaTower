@@ -70,12 +70,12 @@ router.get('/sharing', auth.authorize, function (req, res, next) {
 
 router.get('/share', auth.authorize, function (req, res, next) {
     if (!shareCache) buildShareCache();
-    res.render('tower/share', { title: '整合分析', shares: shareCache.filter(x => x.begin.status != '预备' && x.end.status != '预备') });
+    res.render('tower/share', { isShare: true, title: '整合分析', shares: shareCache.filter(x => x.begin.status != '预选' && x.end.status != '预选') });
 });
 
 router.get('/newap', auth.authorize, function (req, res, next) {
     if (!shareCache) buildShareCache();
-    res.render('tower/share', { title: '新建分析', shares: shareCache.filter(x => x.begin.status == '预备' || x.end.status == '预备') });
+    res.render('tower/share', { isShare: false, title: '新建分析', shares: shareCache.filter(x => x.begin.status == '预选' || x.end.status == '预选') });
 });
 
 router.get('/', auth.authorize, function (req, res, next) {
@@ -253,6 +253,75 @@ router.get('/suggest', auth.authorize, function (req, res, next) {
             res.render('tower/suggest', { title: '站址推荐', suggestions: suggestCache });
         })
         .then(null, next);
+});
+
+router.get('/export', auth.authorize, function (req, res, next) {
+    let query = db.towers.find();
+    if (req.query.city)
+        query = query.where({ city: req.query.city });
+    if (req.query.district)
+        query = query.where({ district: req.query.district });
+    if (req.query.type)
+        query = query.where({ type: req.query.type });
+    if (req.query.provider)
+        query = query.where({ provider: new RegExp('.*' + req.query.provider + '.*') });
+    if (req.query.name)
+        query = query.where({ name: new RegExp('.*' + req.query.name + '.*') });
+    if (req.query.status)
+        query = query.where({ status: req.query.status });
+    if (!res.locals.isMaster)
+        query = query.where({ city: res.locals.currentUser.city });
+    query
+        .sort({ status: -1 })
+        .exec()
+        .then(function (towers) {
+            let xls = '<table>';
+            xls += '<tr><td>城市</td><td>地区</td><td>名称</td><td>地址</td><td>经度</td><td>纬度</td><td>产权</td><td>塔型</td><td>高度</td><td>场景</td><td>属性</td></tr>';
+            towers.forEach(x => {
+                xls += '<tr><td>' + x.city + '</td><td>' + x.district + '</td><td>' + x.name + '</td><td>' + x.address + '</td><td>' + x.lon + '</td><td>' + x.lat + '</td><td>' + x.provider + '</td><td>' + x.type + '</td><td>' + x.height + '</td><td>' + x.scene + '</td><td>' +  x.status + '</td></tr>';
+            });
+            xls += '</table>';
+            res.setHeader('Content-disposition', 'attachment; filename=towers.xls');
+            res.setHeader('Content-type', 'application/vnd.ms-excel');
+            res.send(xls);
+        })
+        .then(null, next);
+});
+
+router.get('/exportshare', auth.authorize, function (req, res, next) {
+    let xls = '<table>';
+    xls += '<tr><td>铁塔1</td><td>地址</td><td>铁塔2</td><td>地址</td><td>距离（米）</td></tr>';
+    shareCache.filter(x => x.begin.status != '预选' && x.end.status != '预选').forEach(x => {
+        xls += '<tr><td>' + x.begin.name + '(' + x.begin.status + ')' + '</td><td>' + x.begin.address + '</td><td>' + x.end.name + '(' + x.end.status + ')' + '</td><td>' + x.end.address + '</td><td>' + x.dis + '</td></tr>';
+    });
+    xls += '</table>';
+    res.setHeader('Content-disposition', 'attachment; filename=towers.xls');
+    res.setHeader('Content-type', 'application/vnd.ms-excel');
+    res.send(xls);
+});
+
+router.get('/exportplan', auth.authorize, function (req, res, next) {
+    let xls = '<table>';
+    xls += '<tr><td>铁塔1</td><td>地址</td><td>铁塔2</td><td>地址</td><td>距离（米）</td></tr>';
+    shareCache.filter(x => x.begin.status == '预选' || x.end.status == '预选').forEach(x => {
+        xls += '<tr><td>' + x.begin.name + '(' + x.begin.status + ')' + '</td><td>' + x.begin.address + '</td><td>' + x.end.name + '(' + x.end.status + ')' + '</td><td>' + x.end.address + '</td><td>' + x.dis + '</td></tr>';
+    });
+    xls += '</table>';
+    res.setHeader('Content-disposition', 'attachment; filename=towers.xls');
+    res.setHeader('Content-type', 'application/vnd.ms-excel');
+    res.send(xls);
+});
+
+router.get('/exportsuggest', auth.authorize, function (req, res, next) {
+    let xls = '<table>';
+    xls += '<tr><td>经度</td><td>纬度</td><td>半径</td></tr>';
+    suggestCache.forEach(x => {
+        xls += '<tr><td>' + x.lon + '</td><td>' + x.lat + '</td><td>' + x.radius + '</td></tr>';
+    });
+    xls += '</table>';
+    res.setHeader('Content-disposition', 'attachment; filename=towers.xls');
+    res.setHeader('Content-type', 'application/vnd.ms-excel');
+    res.send(xls);
 });
 
 module.exports = router;

@@ -1,6 +1,13 @@
 <div class="content-wrap">
     <div class="container">
         <h2><%= title %></h2>
+        <p>
+            <% if (isShare) { %>
+            <a href="/tower/exportshare" target="_blank" class="btn btn-info">导出</a>
+            <% } else {%>
+            <a href="/tower/exportplan" target="_blank" class="btn btn-info">导出</a>
+            <% } %>
+        </p>
         <% if (shares.length > 0) { %>
         <table class="table">
             <thead>
@@ -15,9 +22,9 @@
             <tbody>
             <% shares.forEach(x => { %>
             <tr>
-                <td><%= x.begin.name %>(<%= x.begin.virtual ? '新' : '老' %>)</td>
+                <td><%= x.begin.name %>(<%= x.begin.status %>)</td>
                 <td><%= x.begin.type %></td>
-                <td><a href="/map?lon=<%= x.lon %>&lat=<%= x.lat %>"><%= x.end.name %>(<%= x.end.virtual ? '新' : '老' %>)</a></td>
+                <td><a href="/map?lon=<%= x.lon %>&lat=<%= x.lat %>"><%= x.end.name %>(<%= x.end.status %>)</a></td>
                 <td><%= x.end.type %></td>
                 <td><%= x.dis %></td>
             </tr>

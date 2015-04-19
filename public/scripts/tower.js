@@ -128,3 +128,7 @@ function DeleteTowers() {
     tmp = tmp.trim();
     $.post('/tower/deletemulti', { ids: tmp }, null);
 }
+
+function exportTowers() {
+    window.open('/tower/export?provider=' + $('#lstProviders').val() + '&type=' + $('#lstTypes').val() + '&district=' + $('#txtSearchDistrict').val() + '&name=' + $('#txtSearchName').val() + '&status=' + $('#lstSearchStatus').val() + '&city=' + $('#txtSearchCity').val());
+}
