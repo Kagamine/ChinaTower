@@ -133,6 +133,9 @@
 <div class="content-wrap">
     <div class="container">
         <h2>铁塔管理</h2>
+        <p>
+            <a href="javascript:$('#modalImportTowers').modal('show')" class="btn btn-success">导入铁塔数据</a>
+        </p>
         <div class="form-actions">
             <p class="form-inline">
                 <input type="text" placeholder="铁塔名称" id="txtSearchName" />
@@ -148,6 +151,7 @@
                     <option value="T">T</option>
                     <option value="Z">Z</option>
                 </select>
+                <input type="text" placeholder="城市" id="txtSearchCity" />
                 <input type="text" placeholder="地区" id="txtSearchDistrict" />
                 <select id="lstSearchStatus">
                     <option value="">属性</option>
@@ -157,11 +161,12 @@
                     <option value="储备">储备</option>
                 </select>
                 <button role="button" class="btn btn-primary" id="btnSearchTower">检索</button>
-                <a href="javascript:$('#modalImportTowers').modal('show')" class="btn btn-success" style="float:right">导入铁塔数据</a>
             </p>
         </div>
+        <p><a href="javascript:DeleteTowers()" class="btn btn-danger">批量删除</a></p>
         <table class="table">
             <thead>
+            <th><input type="checkbox" id="chkSelectAll" /> 全选</th>
             <th>名称</th>
             <th>城市</th>
             <th>地区</th>

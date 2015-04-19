@@ -14,6 +14,8 @@ router.get('/', auth.authorize, function (req, res, next) {
     let query = db.towers.find();
     if (req.query.district)
         query = query.where({ district: req.query.district });
+    if (req.query.city)
+        query = query.where({ city: req.query.city });
     if (req.query.type)
         query = query.where({ type: req.query.type });
     if (req.query.provider)

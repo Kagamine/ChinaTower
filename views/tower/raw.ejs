@@ -1,5 +1,6 @@
 <% towers.forEach(x => { %>
 <tr data-tower="<%= x._id %>" data-status="<%= x.status %>" data-url="<%= x.url %>" data-scene="<%= x.scene %>" data-provider="<%= x.provider %>" data-lon="<%= x.lon %>" data-lat="<%= x.lat%>" data-picture="<%= x.picture %>" data-height="<%= x.height %>">
+    <td><input type="checkbox" data-id="<%= x._id %>" class="tower-chk" /></td>
     <td class="name"><%= x.name %></td>
     <td class="city"><%= x.city %></td>
     <td class="district"><%= x.district %></td>

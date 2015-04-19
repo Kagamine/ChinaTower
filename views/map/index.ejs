@@ -256,12 +256,13 @@
         $.getJSON('/tower/positions', { series: series, left: left, right: right, top: top, bottom: bottom }, function (towers) {
             for (var i = 0; i < towers.length; i ++)
             {
+                if (!($('#chkNormal').is(':checked') && towers[i].status == '正常' || $('#chkHard').is(':checked') && towers[i].status == '难点' || $('#chkStock').is(':checked') && towers[i].status == '储备' || $('#chkPlan').is(':checked') && towers[i].name && towers[i].status == '预选' || $('#chkSuggest').is(':checked') && !towers[i].name && towers[i].status == '预选'))
+                    continue;
                 var pos = GPS.wgs_to_bd(towers[i].lat, towers[i].lon);
                 var pt = new BMap.Point(pos.lon, pos.lat);
                 var circle = new BMap.Circle(pt, towers[i].radius * 1000, { fillColor: towers[i].status == '预选' ? 'red' : 'green', strokerColor: towers[i].status == '预选' ? 'red' : 'green', strokerWeight: 0.01, fillOpacity: 0.1, strokeOpacity: 0.01 });
-
                 map.addOverlay(circle);
-                if (!towers[i].status == '预选' || towers[i].name)
+                if (towers[i].status != '预选' || towers[i].name)
                 {
                     var marker = new BMap.Marker(pt, { icon: icons[towers[i].provider][towers[i].type] });
                     marker.height = towers[i].height;
@@ -304,41 +305,42 @@
                 }
             }
         });
-        $.getJSON('/signal/rxlev', { left: left, right: right, top: top, bottom: bottom }, function (lines) {
-            for (var i = 0; i < lines.length; i++) {
-                var points = [];
-                for (var j = 0; j < lines[i].points.length; j++) {
-                    var result = GPS.wgs_to_bd(lines[i].points[j].lat, lines[i].points[j].lon);
-                    points.push(new BMap.Point(result.lon, result.lat));
+        if ($('#chkRxlev').is(':checked'))
+            $.getJSON('/signal/rxlev', { left: left, right: right, top: top, bottom: bottom }, function (lines) {
+                for (var i = 0; i < lines.length; i++) {
+                    var points = [];
+                    for (var j = 0; j < lines[i].points.length; j++) {
+                        var result = GPS.wgs_to_bd(lines[i].points[j].lat, lines[i].points[j].lon);
+                        points.push(new BMap.Point(result.lon, result.lat));
+                    }
+                    var color = "#00ff00";
+                    if (lines[i].color == 1) color = "#fff000";
+                    if (lines[i].color == 2) color = "#ff0000";
+                    var polyline = new BMap.Polyline(points, {strokeColor:color, strokeWeight:5, strokeOpacity:1});
+                    map.addOverlay(polyline);
                 }
-                var color = "#00ff00";
-                if (lines[i].color == 1) color = "#fff000";
-                if (lines[i].color == 2) color = "#ff0000";
-                var polyline = new BMap.Polyline(points, {strokeColor:color, strokeWeight:5, strokeOpacity:1});
-                map.addOverlay(polyline);
-            }
-        });
-
-        $.getJSON('/tower/sharing', { left: left, right: right, top: top, bottom: bottom }, function (lines) {
-            for (var i = 0; i < lines.length; i++) {
-                var points = [];
-                var result = GPS.wgs_to_bd(lines[i].begin.lat, lines[i].begin.lon);
-                points.push(new BMap.Point(result.lon, result.lat));
-                result = GPS.wgs_to_bd(lines[i].end.lat, lines[i].end.lon);
-                points.push(new BMap.Point(result.lon, result.lat));
-                var polyline = new BMap.Polyline(points, {strokeColor:'purple', strokeWeight:5, strokeOpacity:1});
-                map.addOverlay(polyline);
-            }
-        });
+            });
+        if ($('#chkShare').is(':checked'))
+            $.getJSON('/tower/sharing', { left: left, right: right, top: top, bottom: bottom }, function (lines) {
+                for (var i = 0; i < lines.length; i++) {
+                    var points = [];
+                    var result = GPS.wgs_to_bd(lines[i].begin.lat, lines[i].begin.lon);
+                    points.push(new BMap.Point(result.lon, result.lat));
+                    result = GPS.wgs_to_bd(lines[i].end.lat, lines[i].end.lon);
+                    points.push(new BMap.Point(result.lon, result.lat));
+                    var polyline = new BMap.Polyline(points, {strokeColor:'purple', strokeWeight:5, strokeOpacity:1});
+                    map.addOverlay(polyline);
+                }
+            });
     }
     function gps ()
     {
         navigator.geolocation.getCurrentPosition(
-            function(position) {
-                $('#txtLon').val(position.coords.longitude);
-                $('#txtLat').val(position.coords.latitude);
-                $('#modalEditTower').modal('show');
-            }
+                function(position) {
+                    $('#txtLon').val(position.coords.longitude);
+                    $('#txtLat').val(position.coords.latitude);
+                    $('#modalEditTower').modal('show');
+                }
         );
     }
 </script>

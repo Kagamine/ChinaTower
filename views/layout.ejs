@@ -25,9 +25,24 @@
             <a class="brand" href="/">中国铁塔</a>
             <div class="nav-collapse collapse">
                 <ul class="nav">
+                    <% if(typeof(map) == 'undefined') { %>
                     <li>
                         <a href="/map">地图展示</a>
                     </li>
+                    <% } else { %>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">地图展示 <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><div class="nav-chk"><input id="chkRxlev" checked type="checkbox" onclick="BuildOverlays()" /> 路测信号</div></li>
+                            <li><div class="nav-chk"><input id="chkNormal" checked type="checkbox" onclick="BuildOverlays()" /> 正常铁塔</div></li>
+                            <li><div class="nav-chk"><input id="chkStock" checked type="checkbox" onclick="BuildOverlays()" /> 储备铁塔</div></li>
+                            <li><div class="nav-chk"><input id="chkHard" checked type="checkbox" onclick="BuildOverlays()" /> 难点铁塔</div></li>
+                            <li><div class="nav-chk"><input id="chkPlan" checked type="checkbox" onclick="BuildOverlays()" /> 预选铁塔</div></li>
+                            <li><div class="nav-chk"><input id="chkSuggest" checked type="checkbox" onclick="BuildOverlays()" /> 主动规划铁塔</div></li>
+                            <li><div class="nav-chk"><input id="chkShare" checked type="checkbox" onclick="BuildOverlays()" /> 整合标识</div></li>
+                        </ul>
+                    </li>
+                    <% } %>
                     <li class="">
                         <a href="/tower">铁塔管理</a>
                     </li>

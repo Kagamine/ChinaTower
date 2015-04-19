@@ -1,4 +1,5 @@
 var os = require('os');
+var fs = require('fs');
 var _ = GLOBAL._ = require('underscore');
 var express = require('express');
 var expressLayouts = require('express-ejs-layouts');
@@ -49,6 +50,8 @@ app.use(function (req, res, next) {
     res.locals.moment = moment;
     next();
 });
+
+var settings = GLOBAL.settings = JSON.parse(fs.readFileSync(__dirname + '/config.json'));
 
 app.use('/', home);
 app.use('/login', login);

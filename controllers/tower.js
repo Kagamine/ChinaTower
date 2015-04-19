@@ -6,7 +6,7 @@ var suggest = require('../lib/suggest');
 var combine = require('../lib/combine');
 
 let suggestCache;
-let shareCache;
+GLOBAL.shareCache = [];
 
 function buildShareCache()
 {
@@ -82,6 +82,8 @@ router.get('/', auth.authorize, function (req, res, next) {
     if (!req.query.raw)
         return next();
     let query = db.towers.find();
+    if (req.query.city)
+        query = query.where({ city: req.query.city });
     if (req.query.district)
         query = query.where({ district: req.query.district });
     if (req.query.type)
@@ -150,6 +152,14 @@ router.post('/delete', auth.authorize, function (req, res, next) {
     res.send('true');
 });
 
+router.post('/deletemulti', auth.authorize, function (req, res, next) {
+    let tmp = req.body.ids.split(' ');
+    tmp.forEach(x => {
+        db.towers.remove({ _id: x }).exec();
+    });
+    res.send('true');
+});
+
 router.post('/create', auth.authorize, function (req, res, next) {
     let tower = new db.towers();
     tower.name = req.body.name;
@@ -181,7 +191,7 @@ router.post('/create', auth.authorize, function (req, res, next) {
                 }).exec();
             });
         }
-        res.redirect('/');
+        res.redirect('/map?lon=' + tower.lon + '&lat=' + tower.lat);
     });
 });
 

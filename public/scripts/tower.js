@@ -17,7 +17,8 @@ function loadTowers() {
             type: $('#lstTypes').val(),
             district: $('#txtSearchDistrict').val(),
             name: $('#txtSearchName').val(),
-            status: $('#lstSearchStatus').val()
+            status: $('#lstSearchStatus').val(),
+            city: $('#txtSearchCity').val()
         }, function (html) {
             $('.tower-list').append(html);
             page ++;
@@ -34,7 +35,8 @@ function loadTowers() {
             type: $('#lstTypes').val(),
             district: $('#txtSearchDistrict').val(),
             name: $('#txtSearchName').val(),
-            status: $('#lstSearchStatus').val()
+            status: $('#lstSearchStatus').val(),
+            city: $('#txtSearchCity').val()
         }, function (html) {
             $('.tower-pano-list').append(html);
             page ++;
@@ -82,6 +84,13 @@ $(document).ready(function () {
         $('tr[data-series="' + id + '"]').remove();
         $.post('/signal/delete', { id: id }, function () {});
     });
+
+    $('#chkSelectAll').click(function () {
+        if ($('#chkSelectAll').is(':checked'))
+            $('.tower-chk').prop("checked", true);
+        else
+            $('.tower-chk').prop("checked", false);
+    });
 });
 
 function editTower(id) {
@@ -106,4 +115,16 @@ function editTower(id) {
 function deleteTower(id) {
     $('tr[data-tower="' + id + '"]').remove();
     $.post('/tower/delete', { id: id }, function () {});
+}
+
+function DeleteTowers() {
+    var tmp = '';
+    $('.tower-chk').each(function () {
+        if ($(this).is(':checked')) {
+            tmp += $(this).attr('data-id') + ' ';
+            $(this).parents('tr').remove();
+        }
+    });
+    tmp = tmp.trim();
+    $.post('/tower/deletemulti', { ids: tmp }, null);
 }
