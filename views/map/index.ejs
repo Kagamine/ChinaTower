@@ -258,10 +258,16 @@
             {
                 if (!($('#chkNormal').is(':checked') && towers[i].status == '正常' || $('#chkHard').is(':checked') && towers[i].status == '难点' || $('#chkStock').is(':checked') && towers[i].status == '储备' || $('#chkPlan').is(':checked') && towers[i].name && towers[i].status == '预选' || $('#chkSuggest').is(':checked') && !towers[i].name && towers[i].status == '预选'))
                     continue;
+                if (!($('#chkCT').is(':checked') && towers[i].provider == 'China Telecom' || $('#chkCU').is(':checked') && towers[i].provider == 'China Unicom' || $('#chkCM').is(':checked') && towers[i].provider == 'China Mobile'))
+                    continue;
                 var pos = GPS.wgs_to_bd(towers[i].lat, towers[i].lon);
                 var pt = new BMap.Point(pos.lon, pos.lat);
-                var circle = new BMap.Circle(pt, towers[i].radius * 1000, { fillColor: towers[i].status == '预选' ? 'red' : 'green', strokerColor: towers[i].status == '预选' ? 'red' : 'green', strokerWeight: 0.01, fillOpacity: 0.1, strokeOpacity: 0.01 });
-                map.addOverlay(circle);
+
+                if ($('#chkSimulate').is(':checked')) {
+                    var circle = new BMap.Circle(pt, towers[i].radius * 1000, { fillColor: towers[i].status == '预选' ? 'red' : 'green', strokerColor: towers[i].status == '预选' ? 'red' : 'green', strokerWeight: 0.01, fillOpacity: 0.1, strokeOpacity: 0.01 });
+                    map.addOverlay(circle);
+                }
+
                 if (towers[i].status != '预选' || towers[i].name)
                 {
                     var marker = new BMap.Marker(pt, { icon: icons[towers[i].provider][towers[i].type] });

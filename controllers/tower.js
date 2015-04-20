@@ -208,7 +208,7 @@ router.post('/import', auth.authorize, function (req, res, next) {
                 x = x.replace(/  /g, ' ');
                 x = x.split(' ');
                 let tower = new db.towers();
-                tower.name = x[0];
+                tower.name = x[3];
                 tower.district = x[1];
                 if (x[2].trim() == '中国移动')
                     tower.provider = 'China Mobile';
@@ -216,17 +216,17 @@ router.post('/import', auth.authorize, function (req, res, next) {
                     tower.provider = 'China Unicom';
                 else
                     tower.provider = 'China Telecom';
-                tower.type = x[3];
-                tower.height = x[4];
+                tower.type = x[8];
+                tower.height = x[9];
                 tower.lon = x[5];
                 tower.lat = x[6];
-                tower.scene = x[7];
-                tower.address = x[8];
+                tower.scene = x[4];
+                tower.address = x[7];
                 tower.status = req.body.status;
                 if (res.locals.currentUser.city)
                     tower.city = res.locals.currentUser.city;
                 else
-                    tower.city = x[9];
+                    tower.city = x[0];
                 tower.save();
             } catch (e) {
                 console.error(e);
@@ -281,7 +281,7 @@ router.get('/export', auth.authorize, function (req, res, next) {
                 xls += '<tr><td>' + x.city + '</td><td>' + x.district + '</td><td>' + x.name + '</td><td>' + x.address + '</td><td>' + x.lon + '</td><td>' + x.lat + '</td><td>' + x.provider + '</td><td>' + x.type + '</td><td>' + x.height + '</td><td>' + x.scene + '</td><td>' +  x.status + '</td></tr>';
             });
             xls += '</table>';
-            res.setHeader('Content-disposition', 'attachment; filename=towers.xls');
+            res.setHeader('Content-disposition', 'attachment; filename=铁塔数据.xls');
             res.setHeader('Content-type', 'application/vnd.ms-excel');
             res.send(xls);
         })
@@ -291,11 +291,11 @@ router.get('/export', auth.authorize, function (req, res, next) {
 router.get('/exportshare', auth.authorize, function (req, res, next) {
     let xls = '<table>';
     xls += '<tr><td>铁塔1</td><td>地址</td><td>铁塔2</td><td>地址</td><td>距离（米）</td></tr>';
-    shareCache.filter(x => x.begin.status != '预选' && x.end.status != '预选').forEach(x => {
+    shareCache.filter(x => x.begin.status != '预选' && x.end.status != '预选' && x.begin.status != '难点' && x.end.status != '难点').forEach(x => {
         xls += '<tr><td>' + x.begin.name + '(' + x.begin.status + ')' + '</td><td>' + x.begin.address + '</td><td>' + x.end.name + '(' + x.end.status + ')' + '</td><td>' + x.end.address + '</td><td>' + x.dis + '</td></tr>';
     });
     xls += '</table>';
-    res.setHeader('Content-disposition', 'attachment; filename=towers.xls');
+    res.setHeader('Content-disposition', 'attachment; filename=整合分析.xls');
     res.setHeader('Content-type', 'application/vnd.ms-excel');
     res.send(xls);
 });
@@ -303,11 +303,11 @@ router.get('/exportshare', auth.authorize, function (req, res, next) {
 router.get('/exportplan', auth.authorize, function (req, res, next) {
     let xls = '<table>';
     xls += '<tr><td>铁塔1</td><td>地址</td><td>铁塔2</td><td>地址</td><td>距离（米）</td></tr>';
-    shareCache.filter(x => x.begin.status == '预选' || x.end.status == '预选').forEach(x => {
+    shareCache.filter(x => x.begin.status == '预选' || x.end.status == '预选').filter(x => x.begin.status != '难点' && x.end.status != '难点').forEach(x => {
         xls += '<tr><td>' + x.begin.name + '(' + x.begin.status + ')' + '</td><td>' + x.begin.address + '</td><td>' + x.end.name + '(' + x.end.status + ')' + '</td><td>' + x.end.address + '</td><td>' + x.dis + '</td></tr>';
     });
     xls += '</table>';
-    res.setHeader('Content-disposition', 'attachment; filename=towers.xls');
+    res.setHeader('Content-disposition', 'attachment; filename=新建分析.xls');
     res.setHeader('Content-type', 'application/vnd.ms-excel');
     res.send(xls);
 });
@@ -319,7 +319,24 @@ router.get('/exportsuggest', auth.authorize, function (req, res, next) {
         xls += '<tr><td>' + x.lon + '</td><td>' + x.lat + '</td><td>' + x.radius + '</td></tr>';
     });
     xls += '</table>';
-    res.setHeader('Content-disposition', 'attachment; filename=towers.xls');
+    res.setHeader('Content-disposition', 'attachment; filename=主动规划.xls');
+    res.setHeader('Content-type', 'application/vnd.ms-excel');
+    res.send(xls);
+});
+
+router.get('/relation', auth.authorize, function (req, res, next) {
+    if (!shareCache) buildShareCache();
+    res.render('tower/relation', { title: '关联性分析', shares: shareCache.filter(x => x.begin.status == '难点' && x.end.status == '预选' || x.end.status == '难点' && x.begin.status == '预选') });
+});
+
+router.get('/exportrelation', auth.authorize, function (req, res, next) {
+    let xls = '<table>';
+    xls += '<tr><td>铁塔1</td><td>地址</td><td>铁塔2</td><td>地址</td><td>距离（米）</td></tr>';
+    shareCache.filter(x => x.begin.status == '难点' && x.end.status == '预选' || x.end.status == '难点' && x.begin.status == '预选').forEach(x => {
+        xls += '<tr><td>' + x.begin.name + '(' + x.begin.status + ')' + '</td><td>' + x.begin.address + '</td><td>' + x.end.name + '(' + x.end.status + ')' + '</td><td>' + x.end.address + '</td><td>' + x.dis + '</td></tr>';
+    });
+    xls += '</table>';
+    res.setHeader('Content-disposition', 'attachment; filename=关联性分析.xls');
     res.setHeader('Content-type', 'application/vnd.ms-excel');
     res.send(xls);
 });

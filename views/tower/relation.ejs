@@ -1,0 +1,34 @@
+<div class="content-wrap">
+    <div class="container">
+        <h2><%= title %></h2>
+        <p>
+            <a href="/tower/exportrelation" target="_blank" class="btn btn-info">导出</a>
+        </p>
+        <% if (shares.length > 0) { %>
+        <table class="table">
+            <thead>
+            <tr>
+                <td>铁塔1</td>
+                <td>塔型</td>
+                <td>铁塔2</td>
+                <td>塔型</td>
+                <td>距离（米）</td>
+            </tr>
+            </thead>
+            <tbody>
+            <% shares.forEach(x => { %>
+            <tr>
+                <td><%= x.begin.name %>(<%= x.begin.status %>)</td>
+                <td><%= x.begin.type %></td>
+                <td><a href="/map?lon=<%= x.lon %>&lat=<%= x.lat %>"><%= x.end.name %>(<%= x.end.status %>)</a></td>
+                <td><%= x.end.type %></td>
+                <td><%= x.dis %></td>
+            </tr>
+            <% }) %>
+            </tbody>
+        </table>
+        <% } else { %>
+        <p>没有任何预选站址在难点区</p>
+        <% } %>
+    </div>
+</div>
