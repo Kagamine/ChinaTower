@@ -195,6 +195,7 @@
 </div>
 <script type="text/javascript" src="http://api.map.baidu.com/library/DistanceTool/1.2/src/DistanceTool_min.js"></script>
 <script>
+    var lock = false;
     var map = new BMap.Map("allmap");
     var myDis = new BMapLib.DistanceTool(map);
     <% if (req.query.series) { %>
@@ -243,6 +244,8 @@
     BuildOverlays();
     function BuildOverlays()
     {
+        if (lock) return;
+        lock = true;
         map.clearOverlays();
         var cp = map.getBounds(); //返回map可视区域，以地理坐标表示
         var sw = cp.getSouthWest(); //返回矩形区域的西南角
@@ -254,6 +257,7 @@
         var top = tmp2.lat;
         var bottom = tmp1.lat;
         $.getJSON('/tower/positions', { series: series, left: left, right: right, top: top, bottom: bottom }, function (towers) {
+            lock = false;
             for (var i = 0; i < towers.length; i ++)
             {
                 if (!($('#chkNormal').is(':checked') && towers[i].status == '正常' || $('#chkHard').is(':checked') && towers[i].status == '难点' || $('#chkStock').is(':checked') && towers[i].status == '储备' || $('#chkPlan').is(':checked') && towers[i].name && towers[i].status == '预选' || $('#chkSuggest').is(':checked') && !towers[i].name && towers[i].status == '预选'))
@@ -263,14 +267,16 @@
                 var pos = GPS.wgs_to_bd(towers[i].lat, towers[i].lon);
                 var pt = new BMap.Point(pos.lon, pos.lat);
 
+                var circle;
                 if ($('#chkSimulate').is(':checked')) {
-                    var circle = new BMap.Circle(pt, towers[i].radius * 1000, { fillColor: towers[i].status == '预选' ? 'red' : 'green', strokerColor: towers[i].status == '预选' ? 'red' : 'green', strokerWeight: 0.01, fillOpacity: 0.1, strokeOpacity: 0.01 });
+                    circle = new BMap.Circle(pt, towers[i].radius * 1000, { fillColor: towers[i].status == '预选' ? 'red' : 'green', strokerColor: towers[i].status == '预选' ? 'red' : 'green', strokerWeight: 0.01, fillOpacity: 0.1, strokeOpacity: 0.01 });
                     map.addOverlay(circle);
                 }
 
                 if (towers[i].status != '预选' || towers[i].name)
                 {
                     var marker = new BMap.Marker(pt, { icon: icons[towers[i].provider][towers[i].type] });
+                    marker._id = towers[i]._id;
                     marker.height = towers[i].height;
                     marker.name = towers[i].name;
                     marker.district = towers[i].district;
@@ -279,6 +285,8 @@
                     marker.type = towers[i].type;
                     marker.url = towers[i].url;
                     marker.status = towers[i].status;
+                    marker.simulate = circle;
+                    marker.radius = towers[i].radius;
                     marker.addEventListener("mouseover", function (e) {
                         var x = event.clientX;
                         var y = event.clientY;
@@ -302,11 +310,22 @@
                     marker.addEventListener("mouseout", function (e) {
                         $("#tower").hide();
                     });
+                    marker.addEventListener("dragend", function (e) {
+                        map.removeOverlay(e.target.simulate);
+                        var wgspos = GPS.bd_to_wgs(e.point.lat, e.point.lng);
+                        $.post('/tower/modifypos', { lon: wgspos.lon, lat: wgspos.lat, id: e.target._id });
+                        var newpos = { lat: e.point.lat, lon: e.point.lng };
+                        var _circle = new BMap.Circle(new BMap.Point(newpos.lon, newpos.lat), e.target.radius * 1000, { fillColor: 'red', strokerColor: 'red', strokerWeight: 0.01, fillOpacity: 0.1, strokeOpacity: 0.01 });
+                        e.target.simulate = _circle;
+                        map.addOverlay(e.target.simulate);
+                    });
                     marker.addEventListener("click", function (e) {
                         if (e.target.url) {
                             window.location = e.target.url;
                         }
                     });
+                    if (towers[i].status == '预选')
+                        marker.enableDragging();
                     map.addOverlay(marker);
                 }
             }

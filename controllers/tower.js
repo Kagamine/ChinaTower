@@ -341,4 +341,17 @@ router.get('/exportrelation', auth.authorize, function (req, res, next) {
     res.send(xls);
 });
 
+router.post('/modifypos', auth.authorize, function (req, res, next) {
+    db.towers.update({ _id: req.body.id }, {
+        lon: req.body.lon,
+        lat: req.body.lat
+    })
+        .exec()
+        .then(function (a) {
+            console.log(a);
+            res.send('true');
+        })
+        .then(null, next);
+});
+
 module.exports = router;
