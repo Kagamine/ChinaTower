@@ -262,7 +262,7 @@
             {
                 if (!($('#chkNormal').is(':checked') && towers[i].status == '正常' || $('#chkHard').is(':checked') && towers[i].status == '难点' || $('#chkStock').is(':checked') && towers[i].status == '储备' || $('#chkPlan').is(':checked') && towers[i].name && towers[i].status == '预选' || $('#chkSuggest').is(':checked') && !towers[i].name && towers[i].status == '预选'))
                     continue;
-                if (!($('#chkCT').is(':checked') && towers[i].provider == 'China Telecom' || $('#chkCU').is(':checked') && towers[i].provider == 'China Unicom' || $('#chkCM').is(':checked') && towers[i].provider == 'China Mobile'))
+                if (!(!towers[i].name || $('#chkCT').is(':checked') && towers[i].provider == 'China Telecom' || $('#chkCU').is(':checked') && towers[i].provider == 'China Unicom' || $('#chkCM').is(':checked') && towers[i].provider == 'China Mobile'))
                     continue;
                 var pos = GPS.wgs_to_bd(towers[i].lat, towers[i].lon);
                 var pt = new BMap.Point(pos.lon, pos.lat);
@@ -353,7 +353,7 @@
                     points.push(new BMap.Point(result.lon, result.lat));
                     result = GPS.wgs_to_bd(lines[i].end.lat, lines[i].end.lon);
                     points.push(new BMap.Point(result.lon, result.lat));
-                    var polyline = new BMap.Polyline(points, {strokeColor:'purple', strokeWeight:5, strokeOpacity:1});
+                    var polyline = new BMap.Polyline(points, {strokeColor: lines[i].begin.status == '预选' || lines[i].end.status == '预选' ? 'purple' : 'blue', strokeWeight:5, strokeOpacity:1});
                     map.addOverlay(polyline);
                 }
             });
