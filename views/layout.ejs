@@ -25,7 +25,7 @@
             <a class="brand" href="/">中国铁塔</a>
             <div class="nav-collapse collapse">
                 <ul class="nav">
-                    <% if(typeof(map) == 'undefined') { %>
+                    <% if (typeof(map) == 'undefined') { %>
                     <li>
                         <a href="/map">地图展示</a>
                     </li>
@@ -35,12 +35,12 @@
                         <ul class="dropdown-menu">
                             <li><div class="nav-chk"><input id="chkRxlev" checked type="checkbox" onclick="BuildOverlays()" /> 路测信号</div></li>
                             <li><div class="nav-chk"><input id="chkNormal" checked type="checkbox" onclick="BuildOverlays()" /> 正常铁塔</div></li>
-                            <li><div class="nav-chk"><input id="chkStock" checked type="checkbox" onclick="BuildOverlays()" /> 储备铁塔</div></li>
-                            <li><div class="nav-chk"><input id="chkHard" checked type="checkbox" onclick="BuildOverlays()" /> 难点铁塔</div></li>
+                            <li><div class="nav-chk"><input id="chkStock" type="checkbox" onclick="BuildOverlays()" /> 储备铁塔</div></li>
+                            <li><div class="nav-chk"><input id="chkHard" type="checkbox" onclick="BuildOverlays()" /> 难点铁塔</div></li>
                             <li><div class="nav-chk"><input id="chkPlan" checked type="checkbox" onclick="BuildOverlays()" /> 预选铁塔</div></li>
-                            <li><div class="nav-chk"><input id="chkSuggest" checked type="checkbox" onclick="BuildOverlays()" /> 主动规划铁塔</div></li>
+                            <li><div class="nav-chk"><input id="chkSuggest" type="checkbox" onclick="BuildOverlays()" /> 主动规划铁塔</div></li>
                             <li><div class="nav-chk"><input id="chkShare" checked type="checkbox" onclick="BuildOverlays()" /> 整合标识</div></li>
-                            <li><div class="nav-chk"><input id="chkSimulate" checked type="checkbox" onclick="BuildOverlays()" /> 仿真分析</div></li>
+                            <li><div class="nav-chk"><input id="chkSimulate" type="checkbox" onclick="BuildOverlays()" /> 仿真分析</div></li>
                             <li><div class="nav-chk"><input id="chkCT" checked type="checkbox" onclick="BuildOverlays()" /> 中国电信</div></li>
                             <li><div class="nav-chk"><input id="chkCM" checked type="checkbox" onclick="BuildOverlays()" /> 中国移动</div></li>
                             <li><div class="nav-chk"><input id="chkCU" checked type="checkbox" onclick="BuildOverlays()" /> 中国联通</div></li>
@@ -64,9 +64,6 @@
                     </li>
                     <li class="">
                         <a href="/pano">实景勘察</a>
-                    </li>
-                    <li class="">
-                        <a href="/statistics">统计分析</a>
                     </li>
                     <% if (isMaster) { %>
                     <li class="">

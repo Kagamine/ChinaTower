@@ -52,6 +52,7 @@ router.post('/import', auth.authorize, function (req, res, next) {
                 rxlevLine.color = x.color;
                 rxlevLine.save();
             });
+            rxlevCache = null;
         });
     }
     res.redirect('/signal');
@@ -60,11 +61,12 @@ router.post('/import', auth.authorize, function (req, res, next) {
 router.post('/delete', auth.authorize, function (req, res, next) {
     db.serieses.remove({ _id: req.body.id })
         .exec(function () {
+            rxlevCache = null;
             res.redirect('/signal');
         });
 });
 
-let rxlevCache = {};
+let rxlevCache = null;
 let EarthRadiusKm = 6378.137;
 
 function getDistance (p1Lat, p1Lng, p2Lat, p2Lng)
@@ -88,15 +90,15 @@ router.get('/rxlev', auth.authorize, function (req, res, next) {
         return;
     }
     if (req.query.series) {
-        if (rxlevCache[req.query.series]) {
-            res.send(rxlevCache[req.query.series]);
+        if (rxlevCache) {
+            res.send(rxlevCache);
         } else {
-            db.rxlevLines.find({ series: req.query.series })
+            db.rxlevLines.find()
                 .sort({ order: 1 })
                 .exec()
                 .then(function (lines) {
-                    rxlevCache[req.query.series] = lines;
-                    let result = rxlevCache[req.query.series].filter(x => x.points.some(y => parseFloat(y.lon) >= parseFloat(req.query.left) && parseFloat(y.lon) <= parseFloat(req.query.right) && parseFloat(y.lat) >= req.query.bottom && parseFloat(y.lat) <= parseFloat(req.query.top)));
+                    rxlevCache = lines;
+                    let result = rxlevCache.filter(x => x.points.some(y => parseFloat(y.lon) >= parseFloat(req.query.left) && parseFloat(y.lon) <= parseFloat(req.query.right) && parseFloat(y.lat) >= req.query.bottom && parseFloat(y.lat) <= parseFloat(req.query.top)));
                     res.send(result);
                 })
                 .then(null, next);
@@ -110,15 +112,15 @@ router.get('/rxlev', auth.authorize, function (req, res, next) {
             .exec()
             .then(function (series) {
                 seriesId = series[0]._id.toString();
-                if (rxlevCache[seriesId]) {
-                    res.send(rxlevCache[seriesId]);
+                if (rxlevCache) {
+                    res.send(rxlevCache);
                 } else {
-                    db.rxlevLines.find({ series: seriesId })
+                    db.rxlevLines.find()
                         .sort({ order: 1 })
                         .exec()
                         .then(function (lines) {
-                            rxlevCache[req.query.series] = lines;
-                            let result = rxlevCache[req.query.series].filter(x => x.points.some(y => parseFloat(y.lon) >= parseFloat(req.query.left) && parseFloat(y.lon) <= parseFloat(req.query.right) && parseFloat(y.lat) >= req.query.bottom && parseFloat(y.lat) <= parseFloat(req.query.top)));
+                            rxlevCache = lines;
+                            let result = rxlevCache.filter(x => x.points.some(y => parseFloat(y.lon) >= parseFloat(req.query.left) && parseFloat(y.lon) <= parseFloat(req.query.right) && parseFloat(y.lat) >= req.query.bottom && parseFloat(y.lat) <= parseFloat(req.query.top)));
                             console.log(result.length);
                             res.send(result);
                         })

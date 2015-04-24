@@ -22,6 +22,13 @@ function buildShareCache()
                     shareCache.push(y);
                 });
             }
+            shareCache = shareCache.sort((a, b) => {
+                if (a.begin.status == '预选' && a.end.status == '预选')
+                    return 0;
+                else if (a.begin.status == '预选' && a.end.status != '预选')
+                    return 1;
+                else return -1;
+            });
         });
 }
 
@@ -149,6 +156,7 @@ router.post('/edit', auth.authorize, function (req, res, next) {
 
 router.post('/delete', auth.authorize, function (req, res, next) {
     db.towers.remove({ _id: req.body.id }).exec();
+    shareCache = null;
     res.send('true');
 });
 
@@ -157,6 +165,8 @@ router.post('/deletemulti', auth.authorize, function (req, res, next) {
     tmp.forEach(x => {
         db.towers.remove({ _id: x }).exec();
     });
+    buildShareCache();
+    buildSuggestCache();
     res.send('true');
 });
 
@@ -281,7 +291,7 @@ router.get('/export', auth.authorize, function (req, res, next) {
                 xls += '<tr><td>' + x.city + '</td><td>' + x.district + '</td><td>' + x.name + '</td><td>' + x.address + '</td><td>' + x.lon + '</td><td>' + x.lat + '</td><td>' + x.provider + '</td><td>' + x.type + '</td><td>' + x.height + '</td><td>' + x.scene + '</td><td>' +  x.status + '</td></tr>';
             });
             xls += '</table>';
-            res.setHeader('Content-disposition', 'attachment; filename=铁塔数据.xls');
+            res.setHeader('Content-disposition', 'attachment; filename=chinatower.xls');
             res.setHeader('Content-type', 'application/vnd.ms-excel');
             res.send(xls);
         })
@@ -295,7 +305,7 @@ router.get('/exportshare', auth.authorize, function (req, res, next) {
         xls += '<tr><td>' + x.begin.name + '(' + x.begin.status + ')' + '</td><td>' + x.begin.address + '</td><td>' + x.end.name + '(' + x.end.status + ')' + '</td><td>' + x.end.address + '</td><td>' + x.dis + '</td></tr>';
     });
     xls += '</table>';
-    res.setHeader('Content-disposition', 'attachment; filename=整合分析.xls');
+    res.setHeader('Content-disposition', 'attachment; filename=chinatower.xls');
     res.setHeader('Content-type', 'application/vnd.ms-excel');
     res.send(xls);
 });
@@ -307,7 +317,7 @@ router.get('/exportplan', auth.authorize, function (req, res, next) {
         xls += '<tr><td>' + x.begin.name + '(' + x.begin.status + ')' + '</td><td>' + x.begin.address + '</td><td>' + x.end.name + '(' + x.end.status + ')' + '</td><td>' + x.end.address + '</td><td>' + x.dis + '</td></tr>';
     });
     xls += '</table>';
-    res.setHeader('Content-disposition', 'attachment; filename=新建分析.xls');
+    res.setHeader('Content-disposition', 'attachment; filename=chinatower.xls');
     res.setHeader('Content-type', 'application/vnd.ms-excel');
     res.send(xls);
 });
@@ -319,7 +329,7 @@ router.get('/exportsuggest', auth.authorize, function (req, res, next) {
         xls += '<tr><td>' + x.lon + '</td><td>' + x.lat + '</td><td>' + x.radius + '</td></tr>';
     });
     xls += '</table>';
-    res.setHeader('Content-disposition', 'attachment; filename=主动规划.xls');
+    res.setHeader('Content-disposition', 'attachment; filename=chinatower.xls');
     res.setHeader('Content-type', 'application/vnd.ms-excel');
     res.send(xls);
 });
@@ -336,7 +346,7 @@ router.get('/exportrelation', auth.authorize, function (req, res, next) {
         xls += '<tr><td>' + x.begin.name + '(' + x.begin.status + ')' + '</td><td>' + x.begin.address + '</td><td>' + x.end.name + '(' + x.end.status + ')' + '</td><td>' + x.end.address + '</td><td>' + x.dis + '</td></tr>';
     });
     xls += '</table>';
-    res.setHeader('Content-disposition', 'attachment; filename=关联性分析.xls');
+    res.setHeader('Content-disposition', 'attachment; filename=chinatower.xls');
     res.setHeader('Content-type', 'application/vnd.ms-excel');
     res.send(xls);
 });
