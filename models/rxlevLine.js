@@ -13,6 +13,16 @@ var rxlevLineSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'serieses',
         index: true
+    },
+    year: {
+        type: Number,
+        index: true,
+        default: 2015
+    },
+    month: {
+        type: Number,
+        index: true,
+        default: 4
     }
 });
 

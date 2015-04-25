@@ -147,9 +147,24 @@
 </div>
 <div id="allmap"></div>
 <div id="buttons">
-    <a class="btn btn-success" href="javascript:myDis.open();" >测距</a>
-    <a class="btn btn-info" href="javascript:gps();" >GPS定位添加铁塔</a>
-    <small style="color:gray">在地图上点击右键添加铁塔</small>
+    <p>
+        <small style="color:gray">路测信号</small>
+        <select id="lstYears" style="width:80px">
+            <% for (var i = 2015; i <= 2099; i ++) { %>
+            <option value="<%= i %>" <%= (new Date).getYear() == i ? 'selected' : '' %>><%= i %>年</option>
+            <% } %>
+        </select>
+        <select id="lstMonths" style="width:60px">
+            <% for (var i = 1; i <= 12; i ++) { %>
+            <option value="<%= i %>" <%= (new Date).getMonth() + 1 == i ? 'selected' : '' %>><%= i %>月</option>
+            <% } %>
+        </select>
+    </p>
+    <p>
+        <a class="btn btn-success" href="javascript:myDis.open();" >测距</a>
+        <a class="btn btn-info" href="javascript:gps();" >GPS定位添加铁塔</a>
+        <small style="color:gray">在地图上点击右键添加铁塔</small>
+    </p>
 </div>
 <div id="graphic">
     <p style="color: green">
@@ -195,6 +210,12 @@
 </div>
 <script type="text/javascript" src="http://api.map.baidu.com/library/DistanceTool/1.2/src/DistanceTool_min.js"></script>
 <script>
+    $('#lstYears').change(function () {
+        BuildOverlays();
+    });
+    $('#lstMonths').change(function () {
+        BuildOverlays();
+    });
     var lock = false;
     var map = new BMap.Map("allmap");
     var myDis = new BMapLib.DistanceTool(map);
@@ -336,7 +357,7 @@
             }
         });
         if ($('#chkRxlev').is(':checked'))
-            $.getJSON('/signal/rxlev', { left: left, right: right, top: top, bottom: bottom }, function (lines) {
+            $.getJSON('/signal/rxlev', { left: left, right: right, top: top, bottom: bottom, year: $('#lstYears').val(), month: $('#lstMonths').val() }, function (lines) {
                 for (var i = 0; i < lines.length; i++) {
                     var points = [];
                     for (var j = 0; j < lines[i].points.length; j++) {

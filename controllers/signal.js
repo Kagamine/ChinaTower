@@ -50,6 +50,8 @@ router.post('/import', auth.authorize, function (req, res, next) {
                 });
                 rxlevLine.series = series._id;
                 rxlevLine.color = x.color;
+                rxlevLine.year = (new Date).getYear();
+                rxlevLine.month = (new Date).getMonth() + 1;
                 rxlevLine.save();
             });
             rxlevCache = null;
@@ -84,50 +86,28 @@ function getDistance (p1Lat, p1Lng, p2Lat, p2Lng)
 }
 
 router.get('/rxlev', auth.authorize, function (req, res, next) {
+    console.log(req.query);
     if (parseFloat(req.query.right) - parseFloat(req.query.left) > 1.188078574995771)
     {
+        console.log(req.query.year, req.query.month, 'empty');
         res.send('[]');
         return;
     }
-    if (req.query.series) {
-        if (rxlevCache) {
-            res.send(rxlevCache);
-        } else {
-            db.rxlevLines.find()
-                .sort({ order: 1 })
-                .exec()
-                .then(function (lines) {
-                    rxlevCache = lines;
-                    let result = rxlevCache.filter(x => x.points.some(y => parseFloat(y.lon) >= parseFloat(req.query.left) && parseFloat(y.lon) <= parseFloat(req.query.right) && parseFloat(y.lat) >= req.query.bottom && parseFloat(y.lat) <= parseFloat(req.query.top)));
-                    res.send(result);
-                })
-                .then(null, next);
-        }
+    if (rxlevCache) {
+        res.send(rxlevCache.filter(x => x.year == req.query.year && x.month == req.query.month && x.points.some(y => parseFloat(y.lon) >= parseFloat(req.query.left) && parseFloat(y.lon) <= parseFloat(req.query.right) && parseFloat(y.lat) >= req.query.bottom && parseFloat(y.lat) <= parseFloat(req.query.top))));
     }
     else {
-        let seriesId;
-        db.serieses.find()
-            .sort({ time: -1 })
-            .limit(1)
+        db.rxlevLines.find()
+            .populate('series')
+            .sort({ order: 1 })
             .exec()
-            .then(function (series) {
-                seriesId = series[0]._id.toString();
-                if (rxlevCache) {
-                    res.send(rxlevCache);
-                } else {
-                    db.rxlevLines.find()
-                        .sort({ order: 1 })
-                        .exec()
-                        .then(function (lines) {
-                            rxlevCache = lines;
-                            let result = rxlevCache.filter(x => x.points.some(y => parseFloat(y.lon) >= parseFloat(req.query.left) && parseFloat(y.lon) <= parseFloat(req.query.right) && parseFloat(y.lat) >= req.query.bottom && parseFloat(y.lat) <= parseFloat(req.query.top)));
-                            console.log(result.length);
-                            res.send(result);
-                        })
-                        .then(null, next);
-                }
+            .then(function (lines) {
+                console.log(req.query.year, req.query.month, 'new');
+                rxlevCache = lines;
+                let result = rxlevCache.filter(x => x.year == req.query.year && x.month == req.query.month && x.points.some(y => parseFloat(y.lon) >= parseFloat(req.query.left) && parseFloat(y.lon) <= parseFloat(req.query.right) && parseFloat(y.lat) >= req.query.bottom && parseFloat(y.lat) <= parseFloat(req.query.top)));
+                res.send(result);
             })
-            .then();
+            .then(null, next);
     }
 });
 
