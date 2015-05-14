@@ -6,7 +6,7 @@ var suggest = require('../lib/suggest');
 var combine = require('../lib/combine');
 
 let suggestCache;
-GLOBAL.shareCache = [];
+GLOBAL.shareCache = null;
 
 function buildShareCache()
 {
@@ -22,6 +22,7 @@ function buildShareCache()
                     shareCache.push(y);
                 });
             }
+            console.log('Sharing Sorting...');
             shareCache = shareCache.sort((a, b) => {
                 if (a.begin.status == '预选' && a.end.status == '预选')
                     return 0;
@@ -29,6 +30,7 @@ function buildShareCache()
                     return 1;
                 else return -1;
             });
+            console.log('Sharing Finished...');
         });
 }
 

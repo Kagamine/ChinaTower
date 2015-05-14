@@ -289,14 +289,19 @@
                 var pt = new BMap.Point(pos.lon, pos.lat);
 
                 var circle;
-                if ($('#chkSimulate').is(':checked')) {
+                if ($('#chkSimulate').is(':checked') || $('#chkPreSimulate').is(':checked') || !towers[i].name && $('#chkSuggest').is(':checked')) {
                     var color = 'green';
                     if (towers[i].status == '预选' && towers[i].name)
                         color = 'blue';
                     if (towers[i].status == '预选' && !towers[i].name)
                         color = 'red';
                     circle = new BMap.Circle(pt, towers[i].radius * 1000, { fillColor: color, strokerColor: towers[i].status == '预选' ? 'red' : 'green', strokerWeight: 0.01, fillOpacity: 0.1, strokeOpacity: 0.01 });
-                    map.addOverlay(circle);
+                    if (!towers[i].name && $('#chkSuggest').is(':checked'))
+                        map.addOverlay(circle);
+                    else if (towers[i].status == '预选' && $('#chkPreSimulate').is(':checked'))
+                        map.addOverlay(circle);
+                    else if (towers[i].status != '预选' && $('#chkSimulate').is(':checked'))
+                        map.addOverlay(circle);
                 }
 
                 if (towers[i].status != '预选' || towers[i].name)
@@ -371,16 +376,22 @@
                     map.addOverlay(polyline);
                 }
             });
-        if ($('#chkShare').is(':checked'))
+        if ($('#chkShare').is(':checked') || $('#chkNewShare').is(':checked'))
             $.getJSON('/tower/sharing', { left: left, right: right, top: top, bottom: bottom }, function (lines) {
                 for (var i = 0; i < lines.length; i++) {
-                    var points = [];
-                    var result = GPS.wgs_to_bd(lines[i].begin.lat, lines[i].begin.lon);
-                    points.push(new BMap.Point(result.lon, result.lat));
-                    result = GPS.wgs_to_bd(lines[i].end.lat, lines[i].end.lon);
-                    points.push(new BMap.Point(result.lon, result.lat));
-                    var polyline = new BMap.Polyline(points, {strokeColor: lines[i].begin.status == '预选' || lines[i].end.status == '预选' ? 'purple' : 'blue', strokeWeight:5, strokeOpacity:1});
-                    map.addOverlay(polyline);
+                    if (lines[i].begin.status == '预选' && lines[i].end.status == '预选'  && $('#chkNewShare').is(':checked') || (lines[i].begin.status == '正常' || lines[i].end.status == '正常') && $('#chkShare').is(':checked')) {
+                        var points = [];
+                        var result = GPS.wgs_to_bd(lines[i].begin.lat, lines[i].begin.lon);
+                        points.push(new BMap.Point(result.lon, result.lat));
+                        result = GPS.wgs_to_bd(lines[i].end.lat, lines[i].end.lon);
+                        points.push(new BMap.Point(result.lon, result.lat));
+                        var polyline = new BMap.Polyline(points, {
+                            strokeColor: lines[i].begin.status == '预选' || lines[i].end.status == '预选' ? 'purple' : 'blue',
+                            strokeWeight: 5,
+                            strokeOpacity: 1
+                        });
+                        map.addOverlay(polyline);
+                    }
                 }
             });
     }
