@@ -50,7 +50,7 @@ router.post('/import', auth.authorize, function (req, res, next) {
                 });
                 rxlevLine.series = series._id;
                 rxlevLine.color = x.color;
-                rxlevLine.year = (new Date).getYear();
+                rxlevLine.year = moment(new Date).format('YYYY');
                 rxlevLine.month = (new Date).getMonth() + 1;
                 rxlevLine.save();
             });
@@ -61,10 +61,12 @@ router.post('/import', auth.authorize, function (req, res, next) {
 });
 
 router.post('/delete', auth.authorize, function (req, res, next) {
-    db.serieses.remove({ _id: req.body.id })
-        .exec(function () {
-            rxlevCache = null;
-            res.redirect('/signal');
+    db.serieses.remove({ _id: req.body.id }, { justOne: false })
+        .exec(err, function () {
+            db.rxlevLines.remove({ series: req.body.id }).exec(err, function () {
+                rxlevCache = null;
+                res.redirect('/signal');
+            });
         });
 });
 
@@ -86,7 +88,6 @@ function getDistance (p1Lat, p1Lng, p2Lat, p2Lng)
 }
 
 router.get('/rxlev', auth.authorize, function (req, res, next) {
-    console.log(req.query);
     if (parseFloat(req.query.right) - parseFloat(req.query.left) > 1.188078574995771)
     {
         console.log(req.query.year, req.query.month, 'empty');
