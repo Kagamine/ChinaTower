@@ -61,9 +61,9 @@ router.post('/import', auth.authorize, function (req, res, next) {
 });
 
 router.post('/delete', auth.authorize, function (req, res, next) {
-    db.serieses.remove({ _id: req.body.id }, { justOne: false })
-        .exec(err, function () {
-            db.rxlevLines.remove({ series: req.body.id }).exec(err, function () {
+    db.serieses.remove({ _id: req.body.id }, false)
+        .exec(function (err) {
+            db.rxlevLines.remove({ series: req.body.id }, false).exec(function (err) {
                 rxlevCache = null;
                 res.redirect('/signal');
             });
