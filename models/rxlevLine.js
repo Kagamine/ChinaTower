@@ -23,6 +23,10 @@ var rxlevLineSchema = new Schema({
         type: Number,
         index: true,
         default: 4
+    },
+    city: {
+        type: String,
+        index: true
     }
 });
 

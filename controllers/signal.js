@@ -52,6 +52,7 @@ router.post('/import', auth.authorize, function (req, res, next) {
                 rxlevLine.color = x.color;
                 rxlevLine.year = moment(new Date).format('YYYY');
                 rxlevLine.month = (new Date).getMonth() + 1;
+                rxlevLine.city = req.body.city;
                 rxlevLine.save();
             });
             rxlevCache = null;
@@ -106,6 +107,8 @@ router.get('/rxlev', auth.authorize, function (req, res, next) {
                 console.log(req.query.year, req.query.month, 'new');
                 rxlevCache = lines;
                 let result = rxlevCache.filter(x => x.year == req.query.year && x.month == req.query.month && x.points.some(y => parseFloat(y.lon) >= parseFloat(req.query.left) && parseFloat(y.lon) <= parseFloat(req.query.right) && parseFloat(y.lat) >= req.query.bottom && parseFloat(y.lat) <= parseFloat(req.query.top)));
+                if (req.session.currentUser.city)
+                    result = result.filter(x => x.city == req.session.currentUser.city);
                 res.send(result);
             })
             .then(null, next);
