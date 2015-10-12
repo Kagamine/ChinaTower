@@ -44,6 +44,18 @@ function buildSuggestCache()
         });
 }
 
+router.get('/initPosition', auth.authorize, function (req, res, next) {
+    db.towers.find()
+        .exec()
+        .then(function (_towers) {
+            let towers = _towers.map(x => x.toObject());
+            if (res.locals.currentUser.city)
+                towers = towers.filter(x => x.city == res.locals.currentUser.city);
+            res.send(towers[0]);
+        })
+        .then(null, next);
+});
+
 router.get('/positions', auth.authorize, function (req, res, next) {
     db.towers.find()
         .exec()

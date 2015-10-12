@@ -226,8 +226,13 @@
     var init = false;
     if (!init) {
         init = true;
-        if (<%= req.query.lon ? 'false' : 'true' %>)
-            map.centerAndZoom(new BMap.Point(123.98318, 47.32063), 17);
+        if (<%= req.query.lon ? 'false' : 'true' %>) {
+            $.getJSON('/tower/initPosition', {}, function (ret) {
+                map.centerAndZoom(new BMap.Point(ret.lon, ret.lat), 17);
+            });
+            
+        }
+            
     }
     icons['China Mobile'] = {};
     icons['China Mobile']['B'] = new BMap.Icon("/images/cm-b.png", new BMap.Size(30, 30));
